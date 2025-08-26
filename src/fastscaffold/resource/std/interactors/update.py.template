@@ -1,0 +1,32 @@
+from dataclasses import dataclass
+from typing import Final, override
+
+{{auth_import}}
+from {{slug}}.application.persistence.uow import UoW
+{{gw_import}}
+{{entity.import_line}}
+
+
+class Update{{entity.name}}DTO:
+    """DTO for creating {{entity.name|camel_to_human}}."""{% for field, type in entity.fields.items()|no_id %}
+    {{field}}: {{type}}{% endfor %}
+
+
+@dataclass
+@final
+class Update{{entity.name}}Interactor:
+    """Update {{entity.name|camel_to_human}}."""
+
+    {%if with_auth%}user_idp: UserIdProvider{%endif%}
+    uow: UoW
+    {{entity.name|camel_to_snake}}_gw: {{entity.name}}Gateway
+
+    async def __call__(self, uid: {{entity.name}}Id, dto: Update{{entity.name}}DTO) -> {{entity.name}}:
+        """Call."""
+        {%if with_auth%}user_id = await self.user_idp.get_user(){%endif%}
+        async with self.uow:
+            {{entity.name|camel_to_snake}} = await self.{{entity.name|camel_to_snake}}_gw.get_by_id(uid)
+            {% for field in entity.fields|no_id %}{{entity.name|camel_to_snake}}.{{field}} = dto.{{field}}
+            {% endfor %}
+            await self.{{entity.name|camel_to_snake}}_gw.save({{entity.name|camel_to_snake}})
+            return {{entity.name|camel_to_snake}}

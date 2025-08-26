@@ -1,0 +1,30 @@
+from typing import final
+
+from {{slug}}.application.auth.auth import UserCredentialStore
+from {{slug}}.application.identifier import UUIDGenerator
+from {{slug}}.application.persistence.uow import UoW
+{{user.import_line}}
+
+
+@interactor
+@final
+class RegisterInteractor:
+    """Register a user."""
+
+    user_cred_store: UserCredentialStore
+    id_gen: UUIDGenerator
+    uow: UoW
+
+    @impl
+    async def __call__(
+        self,
+        username: str,
+        password: str
+    ) -> User:
+        async with self.uow:
+            user = User(
+                id=self.id_gen(),
+                username=username,
+            )
+            await self.user_cred_store.register_user(user, password)
+            return user

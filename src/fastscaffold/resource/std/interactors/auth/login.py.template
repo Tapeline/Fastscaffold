@@ -1,0 +1,31 @@
+from typing import final
+
+from {{slug}}.application.auth.auth import (
+    AuthToken,
+    UserCredentialStore,
+)
+from {{slug}}.application.auth.exceptions import UserCredsNotFound
+from {{slug}}.application.persistence.uow import UoW
+
+
+@dataclass
+@final
+class LoginInteractor:
+    """Login a user and return auth token."""
+
+    user_cred_store: UserCredentialStore
+    uow: UoW
+
+    async def __call__(
+        self,
+        username: str,
+        password: str
+    ) -> AuthToken:
+        """Call."""
+        async with self.uow:
+            user_id = await self.user_cred_store.login_user(
+                username, password
+            )
+            if not user_id:
+                raise UserCredsNotFound
+            return await self.user_cred_store.generate_token(user_id)

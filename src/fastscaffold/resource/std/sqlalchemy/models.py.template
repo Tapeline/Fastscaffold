@@ -1,0 +1,33 @@
+from datetime import datetime
+from typing import final
+
+from sqlalchemy import DateTime, ForeignKey, String, Uuid
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.sql.functions import current_timestamp
+
+
+class Base(DeclarativeBase):
+    """Base model."""
+
+
+{% for entity in entities %}@final
+class {{entity.name}}Model(Base):
+    """Table for {{entity.name|camel_to_human}}s."""
+
+    __tablename__ = "{{entity.name|camel_to_snake}}s"
+
+    uuid: Mapped[str] = mapped_column(
+        "uuid",
+        Uuid,
+        primary_key=True,
+    )
+    {% for field, type in entity.fields.items()|no_id %}
+    {% if type.endswith("Id") %}{{field}}: Mapped[str] = mapped_column(
+        "{{field}}",
+        ForeignKey("{{type.removesuffix("Id")|camel_to_snake}}s.uuid")
+    )
+    {{field.removesuffix("_id")}}: Mapped[{{type.removesuffix("Id")}}Model] = relationship()
+    {%else%}{{field}}: Mapped[{{type}}]{% endif %}{% endfor %}
+
+
+{% endfor %}

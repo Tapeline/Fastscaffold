@@ -1,0 +1,23 @@
+from typing import final
+
+from {{slug}}.application.auth.auth import UserIdProvider
+from {{slug}}.application.persistence.uow import UoW
+{{user_gw.import_line}}
+{{user.import_line}}
+
+
+@dataclass
+@final
+class GetProfileInteractor:
+    """Get user's profile."""
+
+    uow: UoW
+    user_gw: {{user_gw.name}}
+    user_idp: UserIdProvider
+
+    @impl
+    async def __call__(self) -> User:
+        async with self.uow:
+            return await self.user_gw.get_by_id(
+                await self.user_idp.get_user()
+            )

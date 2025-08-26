@@ -1,0 +1,19 @@
+from typing import final
+
+from {{slug}}.application.auth.auth import UserCredentialStore, UserIdProvider
+from {{slug}}.application.persistence.uow import UoW
+
+@dataclass
+@final
+class RevokeTokensInteractor:
+    """Revoke all user's auth tokens."""
+
+    uow: UoW
+    user_idp: UserIdProvider
+    cred_store: UserCredentialStore
+
+    async def __call__(self) -> None:
+        """Call."""
+        user_id = await self.user_idp.get_user()
+        async with self.uow:
+            await self.cred_store.revoke_tokens(user_id)

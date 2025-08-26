@@ -1,0 +1,23 @@
+from dataclasses import dataclass
+from typing import Final, override
+
+{{auth_import}}
+from {{slug}}.application.persistence.uow import UoW
+{{gw_import}}
+{{entity.import_line}}
+
+
+@dataclass
+@final
+class Delete{{entity.name}}Interactor:
+    """Delete {{entity.name|camel_to_human}}."""
+
+    {%if with_auth%}user_idp: UserIdProvider{%endif%}
+    uow: UoW
+    {{entity.name|camel_to_snake}}_gw: {{entity.name}}Gateway
+
+    async def __call__(self, uid: {{entity.name}}Id) -> None:
+        """Call."""
+        {%if with_auth%}user_id = await self.user_idp.get_user(){%endif%}
+        async with self.uow:
+            await self.{{entity.name|camel_to_snake}}_gw.delete_by_id(uid)
