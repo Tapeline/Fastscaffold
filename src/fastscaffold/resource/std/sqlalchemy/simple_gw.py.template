@@ -1,0 +1,41 @@
+from typing import override
+
+from sqlalchemy import select, update
+from sqlalchemy.exc import NoResultFound
+
+{{entity.import_line}}
+{{gw.import_line}}{% if opt.get_by_id %}, {{entity.name}}NotFound{% endif %}
+from {{slug}}.infrastructure.persistence.models import {{entity.name}}Model
+from {{slug}}.infrastructure.persistence.uow import SAUoW
+
+
+class Sql{{entity.name}}Gateway({{entity.name}}Gateway):
+    uow: SAUoW
+    {% if opt.get_by_id %}
+    @override
+    async def get_by_id(self, uid: {{entity.name}}Id) -> {{entity.name}}:
+        query = select({{entity.name}}Model).where({{entity.name}}Model.uuid == uid)
+        result = await self.uow.execute(query)
+        try:
+            return _convert_to_{{entity.name|camel_to_snake}}(result.scalars().one())
+        except NoResultFound as exc:
+            raise {{entity.name}}NotFound(uid) from exc
+    {% endif %}
+    {% if opt.save %}
+    @override
+    async def save(self, entity: {{entity.name}}) -> None:
+        model = _convert_to_{{entity.name|camel_to_snake}}_model(entity)
+        self.uow.add(model)
+    {% endif %}
+
+
+def _convert_to_{{entity.name|camel_to_snake}}(model: {{entity.name}}Model) -> {{entity.name}}:
+    return {{entity.name}}({% for field_name in entity.fields.keys() %}
+        {{field_name}}=model.{{field_name}},{% endfor %}
+    )
+
+
+def _convert_to_{{entity.name|camel_to_snake}}_model({{entity.name|camel_to_snake}}: {{entity.name}}) -> {{entity.name}}Model:
+    return {{entity.name}}Model({% for field_name in entity.fields.keys() %}
+        {{field_name}}={{entity.name|camel_to_snake}}.{{field_name}},{% endfor %}
+    )

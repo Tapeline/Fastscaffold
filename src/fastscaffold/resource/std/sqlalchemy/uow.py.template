@@ -12,6 +12,8 @@ class SAUoW(UoW):
     def __init__(self, session: AsyncSession) -> None:
         """Init the UoW."""
         self.session = session
+        self.execute = session.execute
+        self.add = session.add
 
     @override
     async def __aenter__(self) -> None:

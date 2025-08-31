@@ -24,7 +24,12 @@ from fastscaffold.std.py.application.persistence import GatewayInterfaceGen
 from fastscaffold.std.py.domain import EntityGen
 from fastscaffold.std.py.infrastructure.persistence import (
     AlembicGen,
-    SqlalchemyModelsGen,
+    SqlalchemyModelsGen, SqlalchemySimpleGatewayImplGen, SqlalchemyUoWGen,
+)
+from fastscaffold.std.py.presentation.litestar import \
+    (
+    LitestarCommonUserEndpointsGen,
+    LitestarCommonsGen,
 )
 
 
@@ -69,7 +74,8 @@ def test():
                 GatewayInterfaceGen.add_get_paginated_filtered(
                     "get_of_user",
                     author_id="UserId"
-                )
+                ),
+                gen_exceptions=True
             ),
             AddImports(
                 src_in("application", "persistence", "note.py"),
@@ -85,7 +91,22 @@ def test():
                 "Note", with_auth=False, gw_list_method="get_of_user"
             ),
             AlembicGen(),
+            SqlalchemyUoWGen(),
             SqlalchemyModelsGen(["User", "Note"]),
+            SqlalchemySimpleGatewayImplGen(
+                "User",
+                get_by_id=True, save=True
+            ),
+            AddImports(
+                src_in("infrastructure", "persistence", "user.py"),
+                "from test_proj.application.auth.exceptions import UserNotFound"
+            ),
+            SqlalchemySimpleGatewayImplGen(
+                "Note",
+                get_by_id=True, save=True
+            ),
+            LitestarCommonsGen(),
+            LitestarCommonUserEndpointsGen(),
         ]
 
     executor = ScaffoldExecutor()

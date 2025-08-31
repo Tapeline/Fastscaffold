@@ -90,17 +90,31 @@ class GatewayInterfaceGen(ScaffoldComponent):
     def __init__(
         self,
         entity_name: str,
-        *include
+        *include,
+        gen_exceptions: bool = False,
     ):
         self.entity_name = entity_name
         self.include = include
         self.filename = camelsnake.camel_to_snake(entity_name)
+        self.gen_exceptions = gen_exceptions
 
     def build(self, ctx: ScaffoldRunContext) -> None:
         file = ctx.files[src_in(
             "application", "persistence", self.filename + ".py"
         )(ctx)]
         entity = ctx[EntityStore].entities[self.entity_name]
+        exceptions = []
+        if self.gen_exceptions:
+            exceptions.extend([
+                f"class {entity.name}NotFound(Exception):",
+                '    """Raised when entity with such id is not found."""',
+                "",
+                f"    def __init__(self, uid: {self.entity_name}Id) -> None:",
+                '        """Init and set uid."""',
+                "        self.id = uid",
+                "",
+                "",
+            ])
         file.lines.extend([
             "from abc import abstractmethod",
             "from collections.abc import Sequence",
@@ -111,6 +125,7 @@ class GatewayInterfaceGen(ScaffoldComponent):
             f"import PaginationParams",
             "",
             "",
+            *exceptions,
             f"class {self.entity_name}Gateway(Protocol):",
             f'    """Access to {self.filename.replace("_", " ")}s."""',
             "",

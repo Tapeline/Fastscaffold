@@ -1,0 +1,10 @@
+from typing import Final
+
+from {{slug}}.presentation.http.framework.errors import (
+    gen_handler_mapping,
+    infer_code,
+)
+
+handlers: Final = gen_handler_mapping({
+
+})

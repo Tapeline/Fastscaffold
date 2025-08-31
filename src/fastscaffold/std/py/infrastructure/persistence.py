@@ -1,10 +1,14 @@
 from importlib.resources import read_text
+from typing import Any
+
+from camelsnake import camel_to_snake
 
 from fastscaffold.core.component import ScaffoldComponent
 from fastscaffold.core.context import ScaffoldRunContext
 from fastscaffold.std.configs import ArchitectureConfig, WebProjectConfig
 from fastscaffold.std.gen import src_in
 from fastscaffold.std.jinja import Jinja
+from fastscaffold.std.py.application.persistence import GatewayStore
 from fastscaffold.std.py.domain import EntityStore
 
 
@@ -57,14 +61,14 @@ class SqlalchemyModelsGen(ScaffoldComponent):
         file.lines.extend(result.splitlines())
 
 
+class UoWWasGenerated: ...
+
+
 class SqlalchemyUoWGen(ScaffoldComponent):
     requires_context = [
         WebProjectConfig,
         ArchitectureConfig,
     ]
-
-    def __init__(self, entities: list):
-        self.entities = entities
 
     def build(self, ctx: ScaffoldRunContext) -> None:
         file = ctx.files[src_in(
@@ -74,4 +78,40 @@ class SqlalchemyUoWGen(ScaffoldComponent):
             "sqlalchemy/uow.py.template"
         )
         result = template.render(slug=ctx[WebProjectConfig].slug)
+        file.lines.extend(result.splitlines())
+        ctx += UoWWasGenerated()
+
+
+class SqlalchemySimpleGatewayImplGen(ScaffoldComponent):
+    requires_context = [
+        WebProjectConfig,
+        ArchitectureConfig,
+        EntityStore,
+        GatewayStore,
+        UoWWasGenerated
+    ]
+
+    def __init__(
+        self,
+        entity_name: str,
+        **options: Any
+    ) -> None:
+        self.entity_name = entity_name
+        self.options = options
+
+    def build(self, ctx: ScaffoldRunContext) -> None:
+        file = ctx.files[src_in(
+            "infrastructure",
+            "persistence",
+            camel_to_snake(self.entity_name) + ".py"
+        )(ctx)]
+        template = ctx[Jinja].env.get_template(
+            "sqlalchemy/simple_gw.py.template"
+        )
+        result = template.render(
+            entity=ctx[EntityStore].entities[self.entity_name],
+            gw=ctx[GatewayStore].for_entities[self.entity_name],
+            slug=ctx[WebProjectConfig].slug,
+            opt=self.options
+        )
         file.lines.extend(result.splitlines())
