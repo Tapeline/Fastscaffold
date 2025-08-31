@@ -74,7 +74,14 @@ class SimpleTemplateRender(ScaffoldComponent):
             web_project=ctx[WebProjectConfig],
         )
 
+    def before_build(self, ctx: ScaffoldRunContext) -> None:
+        ...
+
+    def after_build(self, ctx: ScaffoldRunContext) -> None:
+        ...
+
     def build(self, ctx: ScaffoldRunContext) -> None:
+        self.before_build(ctx)
         jinja_vars = self.get_jinja_vars(ctx)
         template = ctx[Jinja].env.get_template(self.template)
         result = template.render(**jinja_vars)
@@ -82,6 +89,7 @@ class SimpleTemplateRender(ScaffoldComponent):
         if self.replace_file:
             file.lines.clear()
         file.lines.extend(result.splitlines())
+        self.after_build(ctx)
 
 
 class SimpleManyTemplatesRender(ScaffoldComponent):
@@ -102,7 +110,14 @@ class SimpleManyTemplatesRender(ScaffoldComponent):
             slug=ctx[WebProjectConfig].slug
         )
 
+    def before_build(self, ctx: ScaffoldRunContext) -> None:
+        ...
+
+    def after_build(self, ctx: ScaffoldRunContext) -> None:
+        ...
+
     def build(self, ctx: ScaffoldRunContext) -> None:
+        self.before_build(ctx)
         jinja_vars = self.get_jinja_vars(ctx)
         for template_dst, template_src in self.templates.items():
             template = ctx[Jinja].env.get_template(template_src)
@@ -114,6 +129,7 @@ class SimpleManyTemplatesRender(ScaffoldComponent):
             if self.replace_files:
                 file.lines.clear()
             file.lines.extend(result.splitlines())
+        self.after_build(ctx)
 
 
 def src_in(where: str, *path: str) -> Callable[[ScaffoldRunContext], str]:

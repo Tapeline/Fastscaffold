@@ -1,4 +1,4 @@
-$user_import
+{{user_import}}
 
 
 class UserException(Exception):
@@ -16,7 +16,7 @@ class UserCredsNotFound(UserException):
 class UserNotFound(UserException):
     """Raised when user with such id is not found."""
 
-    def __init__(self, uid: ${user_class}Id) -> None:
+    def __init__(self, uid: {{user_class}}Id) -> None:
         """Init and set uid."""
         self.id = uid
 
