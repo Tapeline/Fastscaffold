@@ -35,7 +35,7 @@ class UoWInterfaceGen(ScaffoldComponent):
             "application", "persistence", "uow.py"
         )(ctx)]
         file.lines = [
-            "from abc import abstractmethod"
+            "from abc import abstractmethod",
             "from typing import Protocol",
             "",
             "",
@@ -138,6 +138,7 @@ class GatewayInterfaceGen(ScaffoldComponent):
             import_line=(
                 f"from {ctx[WebProjectConfig].slug}"
                 f".{ctx[ArchitectureConfig].application_pkg}"
+                f".persistence"
                 f".{self.filename} import {self.entity_name}Gateway"
             ),
             name=f"{self.entity_name}Gateway"
@@ -227,6 +228,11 @@ class UUIDGeneratorInterfaceGen(ScaffoldComponent):
             "application", "identifier.py"
         )(ctx)]
         file.lines.extend([
+            "import uuid",
+            "from abc import abstractmethod",
+            "from typing import Protocol",
+            "",
+            "",
             "class UUIDGenerator(Protocol):",
             '    """UUID generator."""',
             "",

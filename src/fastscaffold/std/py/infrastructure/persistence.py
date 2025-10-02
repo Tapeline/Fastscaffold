@@ -6,7 +6,7 @@ from camelsnake import camel_to_snake
 from fastscaffold.core.component import ScaffoldComponent
 from fastscaffold.core.context import ScaffoldRunContext
 from fastscaffold.std.configs import ArchitectureConfig, WebProjectConfig
-from fastscaffold.std.gen import src_in
+from fastscaffold.std.gen import SimpleTemplateRender, src_in
 from fastscaffold.std.jinja import Jinja
 from fastscaffold.std.py.application.persistence import GatewayStore
 from fastscaffold.std.py.domain import EntityStore
@@ -115,3 +115,18 @@ class SqlalchemySimpleGatewayImplGen(ScaffoldComponent):
             opt=self.options
         )
         file.lines.extend(result.splitlines())
+
+
+class SqlalchemySessionGen(SimpleTemplateRender):
+    location = ["infrastructure", "persistence", "database.py"]
+    template = "sqlalchemy/database.py.template"
+
+
+class UUIDGeneratorImplGen(SimpleTemplateRender):
+    location = ["infrastructure", "identifier.py"]
+    template = "sqlalchemy/identifier.py.template"
+
+
+class SqlalchemySecurityGen(SimpleTemplateRender):
+    location = ["infrastructure", "persistence", "auth.py"]
+    template = "sqlalchemy/auth.py.template"

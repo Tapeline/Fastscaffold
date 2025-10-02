@@ -72,6 +72,7 @@ class SimpleTemplateRender(ScaffoldComponent):
     def get_jinja_vars(self, ctx: ScaffoldRunContext) -> dict[str, Any]:
         return dict(
             web_project=ctx[WebProjectConfig],
+            slug=ctx[WebProjectConfig].slug
         )
 
     def before_build(self, ctx: ScaffoldRunContext) -> None:
@@ -164,7 +165,15 @@ def src_in(where: str, *path: str) -> Callable[[ScaffoldRunContext], str]:
             ctx[ArchitectureConfig].presentation_pkg,
             *path
         )
-    }[where]
+    }.get(
+        where,
+        lambda ctx: with_src(
+            ctx,
+            ctx[WebProjectConfig].slug,
+            where,
+            *path
+        )
+    )
 
 
 def import_from(pkg: str) -> Callable[[ScaffoldRunContext], str]:

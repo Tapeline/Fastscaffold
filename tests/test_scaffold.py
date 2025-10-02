@@ -5,6 +5,7 @@ from fastscaffold.io import save_files
 from fastscaffold.std.configs import ArchitectureConfig, WebProjectConfig
 from fastscaffold.std.gen import AddImports, SourceGen, import_from, src_in
 from fastscaffold.std.jinja import create_jinja
+from fastscaffold.std.py.algo import ArgonSecurityGen
 from fastscaffold.std.py.application.basic_user import (
     BasicAppAuthGen,
     BasicAppAuthInteractorsGen,
@@ -18,13 +19,26 @@ from fastscaffold.std.py.application.interactors import (
 )
 from fastscaffold.std.py.application.persistence import (
     PaginationDTOGen,
-    UoWInterfaceGen,
+    UUIDGeneratorInterfaceGen, UoWInterfaceGen,
 )
 from fastscaffold.std.py.application.persistence import GatewayInterfaceGen
+from fastscaffold.std.py.bootstrap import (
+    AlgoDIProviderGen, ConfigDIProviderGen,
+    ConfigGen,
+    DEFAULT_PG_CONF,
+    DEFAULT_SECURITY_CONF,
+    LitestarAppGen,
+    LitestarAuthProviderGen,
+    UoWProviderGen,
+)
+from fastscaffold.std.py.configs import PyQAConfigsGen, PyprojectGen
 from fastscaffold.std.py.domain import EntityGen
 from fastscaffold.std.py.infrastructure.persistence import (
     AlembicGen,
-    SqlalchemyModelsGen, SqlalchemySimpleGatewayImplGen, SqlalchemyUoWGen,
+    SqlalchemyModelsGen,
+    SqlalchemySecurityGen, SqlalchemySessionGen,
+    SqlalchemySimpleGatewayImplGen,
+    SqlalchemyUoWGen, UUIDGeneratorImplGen,
 )
 from fastscaffold.std.py.presentation.litestar import \
     (
@@ -35,7 +49,7 @@ from fastscaffold.std.py.presentation.litestar import \
 
 def test():
     def scaffold(ctx: ScaffoldRunContext) -> list[ScaffoldComponent]:
-        ctx += WebProjectConfig("Test Project", "test_proj")
+        ctx += WebProjectConfig("Note taking app", "notetaker")
         ctx += ArchitectureConfig()
         ctx += create_jinja()
 
@@ -44,7 +58,6 @@ def test():
                 name="User",
                 fields=dict(
                     username="str",
-                    hashed_password="str",
                 ),
                 with_id=True
             ),
@@ -57,7 +70,7 @@ def test():
                 ),
                 with_id=True,
                 add_imports=[
-                    "from test_proj.domain.user import UserId"
+                    "from notetaker.domain.user import UserId"
                 ],
             ),
             UoWInterfaceGen(),
@@ -67,6 +80,7 @@ def test():
                 GatewayInterfaceGen.add_save
             ),
             PaginationDTOGen(),
+            UUIDGeneratorInterfaceGen(),
             GatewayInterfaceGen(
                 "Note",
                 GatewayInterfaceGen.add_get_by_id,
@@ -75,11 +89,12 @@ def test():
                     "get_of_user",
                     author_id="UserId"
                 ),
+                GatewayInterfaceGen.add_delete_by_id,
                 gen_exceptions=True
             ),
             AddImports(
                 src_in("application", "persistence", "note.py"),
-                "from test_proj.domain.user import UserId"
+                "from notetaker.domain.user import UserId"
             ),
             BasicAppAuthGen("User"),
             BasicAppAuthInteractorsGen("User"),
@@ -99,19 +114,34 @@ def test():
             ),
             AddImports(
                 src_in("infrastructure", "persistence", "user.py"),
-                "from test_proj.application.auth.exceptions import UserNotFound"
+                "from notetaker.application.auth.exceptions import UserNotFound"
             ),
             SqlalchemySimpleGatewayImplGen(
                 "Note",
                 get_by_id=True, save=True
             ),
+            SqlalchemySecurityGen(),
+            UUIDGeneratorImplGen(),
+            ArgonSecurityGen(),
             LitestarCommonsGen(),
             LitestarCommonUserEndpointsGen(),
+            SqlalchemySessionGen(),
+            ConfigGen(
+                DEFAULT_PG_CONF,
+                DEFAULT_SECURITY_CONF,
+            ),
+            ConfigDIProviderGen(),
+            AlgoDIProviderGen(),
+            LitestarAuthProviderGen(),
+            UoWProviderGen(),
+            LitestarAppGen(),
+            PyprojectGen(),
+            PyQAConfigsGen(),
         ]
 
     executor = ScaffoldExecutor()
     files = executor.run(scaffold)
-    save_files("test_result", files)
+    save_files("../../GeneratedNoteTakingApp", files)
 
 
 if __name__ == "__main__":

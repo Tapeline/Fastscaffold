@@ -1,0 +1,22 @@
+from dishka import Provider, Scope, provide, WithParents
+
+from {{slug}}.application.identifier import UUIDGenerator
+from {{slug}}.infrastructure.identifier import UUIDGeneratorImpl
+from {{slug}}.infrastructure.persistence.auth import (
+    AuthTokenGenerator,
+    PasswordHashComparator,
+    PasswordHasher,
+)
+from {{slug}}.infrastructure.security import ArgonSecurity
+
+
+class AlgorithmsDIProvider(Provider):
+    """Provides different algorithms."""
+
+    scope = Scope.APP
+
+    id_gen = provide(UUIDGeneratorImpl, provides=UUIDGenerator)
+
+    @provide
+    def provide_argon_security(self) -> WithParents[ArgonSecurity]:
+        return ArgonSecurity()

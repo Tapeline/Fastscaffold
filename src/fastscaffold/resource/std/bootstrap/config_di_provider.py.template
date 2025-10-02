@@ -1,0 +1,19 @@
+from dishka import Provider, Scope, from_context, provide
+
+from {{slug}}.config import ({% for config_class in configs %}
+    {{config_class.name}},{% endfor %}
+    Config,
+)
+
+
+class ConfigDIProvider(Provider):
+    """Provider of configs."""
+
+    config = from_context(Config, scope=Scope.APP)
+
+    {% for config in configs %}
+    @provide(scope=Scope.APP)
+    def get_{{config.simple_name|camel_to_snake}}_config(self, config: Config) -> {{config.name}}:
+        """Provide {{config.simple_name|camel_to_snake}} conf."""
+        return config.{{config.simple_name|camel_to_snake}}
+    {% endfor %}

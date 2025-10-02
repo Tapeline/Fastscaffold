@@ -1,0 +1,20 @@
+import os
+
+from pydantic import BaseModel, Field
+
+{% for config in configs %}
+class {{config.name}}(BaseModel):
+    """{{config.simple_name}} config."""
+
+    {% for field_name, field_type in config.fields.items() %}
+    {{field_name}}: {{field_type}}{% if field_name in config.defaults %} = {{config.defaults[field_name]}}{% endif %}{% endfor %}
+{% endfor %}
+
+
+class Config(BaseModel):
+    """Config model."""
+
+    {% for config in configs %}
+    {{config.simple_name|camel_to_snake}}: {{config.name}} = Field(
+        default_factory=lambda: {{config.name}}(**os.environ)  # type: ignore
+    ){% endfor %}

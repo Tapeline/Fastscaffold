@@ -1,10 +1,19 @@
 from typing import Final
 
+from {{slug}}.application.auth.exceptions import (
+    UserAlreadyExists,
+    UserCredsNotFound,
+    UserNotAuthenticated,
+    UserNotFound,
+)
 from {{slug}}.presentation.http.framework.errors import (
     gen_handler_mapping,
     infer_code,
 )
 
 handlers: Final = gen_handler_mapping({
-
+    UserAlreadyExists: (409, infer_code),
+    UserNotFound: (404, infer_code),
+    UserCredsNotFound: (401, infer_code),
+    UserNotAuthenticated: (401, infer_code),
 })

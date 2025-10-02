@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Final, override
+from typing import Final, override, final
 
 {{auth_import}}
 from {{slug}}.application.persistence.uow import UoW

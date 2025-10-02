@@ -1,0 +1,138 @@
+import uuid
+from abc import abstractmethod
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Protocol, cast, final, override
+
+from sqlalchemy import delete, select
+from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.exc import IntegrityError
+
+from {{slug}}.application.auth.auth import (
+    AuthToken,
+    UserCredentialStore,
+)
+from {{slug}}.application.auth.exceptions import UserAlreadyExists
+from {{slug}}.config import SecurityConfig
+from {{slug}}.domain.user import User, UserId
+from {{slug}}.infrastructure.persistence.models import (
+    UserAuthTokenModel,
+    UserModel,
+)
+from {{slug}}.infrastructure.persistence.uow import SAUoW
+
+
+class PasswordHasher(Protocol):
+    """Hash algorithm."""
+
+    @abstractmethod
+    def hash(self, password: str) -> str:
+        """
+        Hash the password.
+
+        Args:
+            password: target password
+
+        Returns: hashed password
+
+        """
+
+
+class PasswordHashComparator(Protocol):
+    """Hashed pass comparator."""
+
+    @abstractmethod
+    def compare(self, hashed: str, password: str) -> bool:
+        """
+        Compare hashed and raw password.
+
+        Args:
+            hashed: hashed password
+            password: raw password
+
+        Returns:
+            are same?
+
+        """
+
+
+class AuthTokenGenerator(Protocol):
+    """Auth token generator."""
+
+    @abstractmethod
+    def gen_token(self) -> str:
+        """
+        Generate auth token.
+
+        Returns: secure and random auth token.
+
+        """
+
+
+@dataclass(slots=True, frozen=True)
+@final
+class UserCredentialStoreImpl(UserCredentialStore):
+    """Impl."""
+
+    uow: SAUoW
+    password_hasher: PasswordHasher
+    password_comparator: PasswordHashComparator
+    token_gen: AuthTokenGenerator
+    sec_conf: SecurityConfig
+
+    @override
+    async def register_user(self, user: User, password: str) -> None:
+        query = insert(UserModel).values(
+            {% for field in user_entity %}{{field}}=user.{{field}},
+            {% endfor %}
+            hashed_pass=self.password_hasher.hash(password),
+        )
+        try:
+            await self.uow.session.execute(query)
+        except IntegrityError as exc:
+            raise UserAlreadyExists(user.username) from exc
+
+    @override
+    async def login_user(self, username: str, password: str) -> UserId | None:
+        query = select(UserModel).where(
+            UserModel.username == username
+        )
+        result = await self.uow.session.execute(query)
+        user = result.scalars().first()
+        if not user:
+            return None
+        return (
+            cast(uuid.UUID, user.id)
+            if self.password_comparator.compare(user.hashed_pass, password)
+            else None
+        )
+
+    @override
+    async def authorize(self, token: AuthToken) -> UserId | None:
+        expiry = datetime.now() - self.sec_conf.token_lifetime
+        query = select(UserAuthTokenModel).where(
+            UserAuthTokenModel.token == token,
+            UserAuthTokenModel.issued_at > expiry
+        )
+        result = await self.uow.session.execute(query)
+        token_model = result.scalars().first()
+        if not token_model:
+            return None
+        return cast(uuid.UUID, token_model.user_id)
+
+    @override
+    async def generate_token(self, user_id: UserId) -> AuthToken:
+        token = self.token_gen.gen_token()
+        query = insert(UserAuthTokenModel).values(
+            user_id=user_id,
+            token=token
+        )
+        await self.uow.session.execute(query)
+        return token
+
+    @override
+    async def revoke_tokens(self, user_id: UserId) -> None:
+        query = delete(UserAuthTokenModel).where(
+            UserAuthTokenModel.user_id == user_id
+        )
+        await self.uow.session.execute(query)

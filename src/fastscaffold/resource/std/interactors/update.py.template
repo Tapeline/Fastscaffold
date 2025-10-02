@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Final, override
+from typing import Final, override, final
 
 {{auth_import}}
 from {{slug}}.application.persistence.uow import UoW
@@ -8,7 +8,7 @@ from {{slug}}.application.persistence.uow import UoW
 
 
 class Update{{entity.name}}DTO:
-    """DTO for creating {{entity.name|camel_to_human}}."""{% for field, type in entity.fields.items()|no_id %}
+    """DTO for updating {{entity.name|camel_to_human}}."""{% for field, type in entity.fields.items()|no_id %}
     {{field}}: {{type}}{% endfor %}
 
 

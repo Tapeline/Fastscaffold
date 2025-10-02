@@ -1,0 +1,74 @@
+import asyncio
+import sys
+
+from dishka import AsyncContainer, make_async_container
+from dishka.integrations.litestar import (
+    LitestarProvider,
+    setup_dishka as litestar_setup_dishka
+)
+from litestar import Litestar
+from litestar.config.cors import CORSConfig
+from litestar.logging import LoggingConfig
+
+{% for di_provider in di_providers %}{{di_provider.import_line}}
+{% endfor %}
+from {{slug}}.config import Config
+from {{slug}}.presentation.http.errors import handlers
+from {{slug}}.presentation.http.openapi import app_openapi_config
+
+
+def _create_config() -> Config:
+    return Config()
+
+
+def _create_container(config: Config) -> AsyncContainer:
+    return make_async_container(
+        LitestarProvider(),
+        {% for di_provider in di_providers %}{{di_provider.name}}(),
+        {% endfor %}
+        context={
+            Config: config,
+        },
+    )
+
+
+def _select_event_loop() -> None:
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(
+            asyncio.WindowsSelectorEventLoopPolicy()
+        )
+
+
+def _create_logging_config() -> LoggingConfig:
+    return LoggingConfig(
+        root={"level": "INFO", "handlers": ["queue_listener"]},
+        formatters={
+            "standard": {
+                "format": (
+                    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                )
+            }
+        },
+        log_exceptions="always",
+    )
+
+
+def create_app() -> Litestar:
+    """Bootstrap the app."""
+    _select_event_loop()
+    config = _create_config()
+    container = _create_container(config)
+    logging_config = _create_logging_config()
+    litestar_app = Litestar(
+        debug=True,
+        route_handlers=[
+            # TODO fill this
+        ],
+        middleware=[],
+        exception_handlers=handlers,  # type: ignore
+        openapi_config=app_openapi_config,
+        logging_config=logging_config,
+        cors_config=CORSConfig(allow_origins=["*"])
+    )
+    litestar_setup_dishka(container, litestar_app)
+    return litestar_app

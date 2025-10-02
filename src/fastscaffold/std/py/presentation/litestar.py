@@ -16,5 +16,5 @@ class LitestarCommonsGen(SimpleManyTemplatesRender):
 
 
 class LitestarCommonUserEndpointsGen(SimpleTemplateRender):
-    location = ["presentation", "http", "user.py"]
+    location = ["presentation", "http", "controllers", "user.py"]
     template = "litestar/auth_controllers.py.template"

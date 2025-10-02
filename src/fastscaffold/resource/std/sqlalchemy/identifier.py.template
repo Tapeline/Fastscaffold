@@ -1,0 +1,12 @@
+from typing import override
+import uuid
+
+from {{slug}}.application.identifier import UUIDGenerator
+
+
+class UUIDGeneratorImpl(UUIDGenerator):
+    """Impl."""
+
+    @override
+    def __call__(self) -> uuid.UUID:
+        return uuid.uuid4()

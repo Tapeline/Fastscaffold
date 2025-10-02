@@ -21,7 +21,7 @@ class BasicAppAuthGen(SimpleManyTemplatesRender):
     base_dir = ["application", "auth"]
     templates = {
         "auth.py": "auth/auth.py.template",
-        "exception.py": "auth/exception.py.template"
+        "exceptions.py": "auth/exceptions.py.template"
     }
 
     def __init__(self, user_entity_name: str):

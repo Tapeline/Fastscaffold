@@ -16,8 +16,8 @@ class {{entity.name}}Model(Base):
 
     __tablename__ = "{{entity.name|camel_to_snake}}s"
 
-    uuid: Mapped[str] = mapped_column(
-        "uuid",
+    id: Mapped[str] = mapped_column(
+        "id",
         Uuid,
         primary_key=True,
     )
@@ -28,6 +28,30 @@ class {{entity.name}}Model(Base):
     )
     {{field.removesuffix("_id")}}: Mapped[{{type.removesuffix("Id")}}Model] = relationship()
     {%else%}{{field}}: Mapped[{{type}}]{% endif %}{% endfor %}
+    {% if entity.name == "User" %}hashed_password: Mapped[str]{% endif %}
 
+{% if entity.name == "User" %}
+@final
+class UserAuthTokenModel(Base):
+    """Table for auth tokens."""
 
+    __tablename__ = "tokens"
+
+    user_id: Mapped[str] = mapped_column(
+        "user_id",
+        ForeignKey("users.uuid")
+    )
+    user: Mapped[UserModel] = relationship()
+    token: Mapped[str] = mapped_column(
+        "token",
+        String(256),
+        primary_key=True
+    )
+    issued_at: Mapped[datetime] = mapped_column(
+        "issued_at",
+        DateTime,
+        default=datetime.now,
+        server_default=current_timestamp()
+    )
+{% endif %}
 {% endfor %}

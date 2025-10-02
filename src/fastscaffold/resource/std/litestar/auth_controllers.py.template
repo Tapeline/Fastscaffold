@@ -106,7 +106,6 @@ class AuthController(Controller):
     ) -> RegisterResponse:
         user = await interactor(
             data.username,
-            data.phone,
             data.password
         )
         return RegisterResponse(
@@ -134,8 +133,6 @@ class AuthController(Controller):
         return ProfileResponse(
             id=user.id,
             username=user.username,
-            phone=user.phone_number,
-            nalog_access_token=user.nalog_access_token
         )
 
     @delete(
