@@ -5,7 +5,7 @@ from typing import Any, ClassVar
 
 from fastscaffold.core.component import ScaffoldComponent
 from fastscaffold.core.context import ScaffoldRunContext
-from fastscaffold.std.configs import ArchitectureConfig, WebProjectConfig
+from fastscaffold.std.configs import WebProjectConfig
 from fastscaffold.std.helpers import with_src
 from fastscaffold.std.jinja import Jinja
 
@@ -13,7 +13,6 @@ from fastscaffold.std.jinja import Jinja
 class SourceGen(ScaffoldComponent):
     requires_context = [
         WebProjectConfig,
-        ArchitectureConfig
     ]
 
     def __init__(
@@ -35,7 +34,6 @@ class SourceGen(ScaffoldComponent):
 class AddImports(ScaffoldComponent):
     requires_context = [
         WebProjectConfig,
-        ArchitectureConfig
     ]
 
     def __init__(
@@ -138,31 +136,31 @@ def src_in(where: str, *path: str) -> Callable[[ScaffoldRunContext], str]:
         "domain": lambda ctx: with_src(
             ctx,
             ctx[WebProjectConfig].slug,
-            ctx[ArchitectureConfig].domain_pkg,
+            "domain",
             *path
         ),
         "application": lambda ctx: with_src(
             ctx,
             ctx[WebProjectConfig].slug,
-            ctx[ArchitectureConfig].application_pkg,
+            "application",
             *path
         ),
         "infrastructure": lambda ctx: with_src(
             ctx,
             ctx[WebProjectConfig].slug,
-            ctx[ArchitectureConfig].infrastructure_pkg,
+            "infrastructure",
             *path
         ),
         "bootstrap": lambda ctx: with_src(
             ctx,
             ctx[WebProjectConfig].slug,
-            ctx[ArchitectureConfig].bootstrap_pkg,
+            "bootstrap",
             *path
         ),
         "presentation": lambda ctx: with_src(
             ctx,
             ctx[WebProjectConfig].slug,
-            ctx[ArchitectureConfig].presentation_pkg,
+            "presentation",
             *path
         )
     }.get(

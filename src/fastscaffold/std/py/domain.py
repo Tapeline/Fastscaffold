@@ -6,7 +6,7 @@ import camelsnake
 
 from fastscaffold.core.component import ScaffoldComponent
 from fastscaffold.core.context import ScaffoldRunContext
-from fastscaffold.std.configs import ArchitectureConfig, WebProjectConfig
+from fastscaffold.std.configs import WebProjectConfig
 from fastscaffold.std.gen import src_in
 from fastscaffold.std.helpers import with_src
 
@@ -60,7 +60,7 @@ class EntityGen(SimpleTemplateRender):
             ctx += EntityStore({})
         import_line = (
             f"from {ctx[WebProjectConfig].slug}"
-            f".{ctx[ArchitectureConfig].domain_pkg}"
+            f".domain"
             f".{self.filename} import {self.name}"
         )
         if self.with_id:

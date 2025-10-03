@@ -2,7 +2,7 @@ from fastscaffold.core.component import ScaffoldComponent
 from fastscaffold.core.context import ScaffoldRunContext
 from fastscaffold.core.execution import ScaffoldExecutor
 from fastscaffold.io import save_files
-from fastscaffold.std.configs import ArchitectureConfig, WebProjectConfig
+from fastscaffold.std.configs import WebProjectConfig
 from fastscaffold.std.gen import AddImports, SourceGen, import_from, src_in
 from fastscaffold.std.jinja import create_jinja
 from fastscaffold.std.py.algo import ArgonSecurityGen
@@ -49,7 +49,6 @@ from fastscaffold.std.py.presentation.litestar import (
 def test():
     def scaffold(ctx: ScaffoldRunContext) -> list[ScaffoldComponent]:
         ctx += WebProjectConfig("Note taking app", "notetaker")
-        ctx += ArchitectureConfig()
         ctx += create_jinja()
 
         return [

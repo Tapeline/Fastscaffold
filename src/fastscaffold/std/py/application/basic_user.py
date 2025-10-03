@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from fastscaffold.core.context import ScaffoldRunContext
-from fastscaffold.std.configs import ArchitectureConfig, WebProjectConfig
+from fastscaffold.std.configs import WebProjectConfig
 from fastscaffold.std.gen import SimpleManyTemplatesRender
 from fastscaffold.std.py.application.persistence import GatewayStore
 from fastscaffold.std.py.domain import EntityStore
@@ -39,8 +39,7 @@ class BasicAppAuthGen(SimpleManyTemplatesRender):
         ctx += AuthConfig(
             import_auth=(
                 f"from {ctx[WebProjectConfig].slug}"
-                f".{ctx[ArchitectureConfig].application_pkg}"
-                f".auth.auth import UserIdProvider"
+                f".application.auth.auth import UserIdProvider"
             )
         )
 

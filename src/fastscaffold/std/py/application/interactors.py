@@ -5,7 +5,7 @@ from jinja2 import Environment
 
 from fastscaffold.core.component import ScaffoldComponent
 from fastscaffold.core.context import ScaffoldRunContext
-from fastscaffold.std.configs import ArchitectureConfig, WebProjectConfig
+from fastscaffold.std.configs import WebProjectConfig
 from fastscaffold.std.gen import SimpleTemplateRender, src_in
 from fastscaffold.std.helpers import with_src
 from fastscaffold.std.jinja import Jinja

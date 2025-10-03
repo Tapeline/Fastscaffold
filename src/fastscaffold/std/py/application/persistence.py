@@ -5,7 +5,7 @@ from typing import Any, Callable
 from camelsnake import camel_to_snake
 
 from fastscaffold.core.context import ScaffoldRunContext
-from fastscaffold.std.configs import ArchitectureConfig, WebProjectConfig
+from fastscaffold.std.configs import WebProjectConfig
 from fastscaffold.std.gen import SimpleTemplateRender, import_from
 from fastscaffold.std.py.domain import EntityStore
 
@@ -69,8 +69,7 @@ class GatewayInterfaceGen(SimpleTemplateRender):
         ctx[GatewayStore].for_entities[self.entity_name] = GeneratedGateway(
             import_line=(
                 f"from {ctx[WebProjectConfig].slug}"
-                f".{ctx[ArchitectureConfig].application_pkg}"
-                f".persistence"
+                f".application.persistence"
                 f".{camel_to_snake(self.entity_name)} import {self.entity_name}Gateway"
             ),
             name=f"{self.entity_name}Gateway",
