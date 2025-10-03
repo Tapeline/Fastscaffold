@@ -40,8 +40,7 @@ from fastscaffold.std.py.infrastructure.persistence import (
     SqlalchemySimpleGatewayImplGen,
     SqlalchemyUoWGen, UUIDGeneratorImplGen,
 )
-from fastscaffold.std.py.presentation.litestar import \
-    (
+from fastscaffold.std.py.presentation.litestar import (
     LitestarCommonUserEndpointsGen,
     LitestarCommonsGen,
 )
@@ -141,7 +140,8 @@ def test():
 
     executor = ScaffoldExecutor()
     files = executor.run(scaffold)
-    save_files("../../GeneratedNoteTakingApp", files)
+    #save_files("../../GeneratedNoteTakingApp", files)
+    save_files("generated_1", files)
 
 
 if __name__ == "__main__":

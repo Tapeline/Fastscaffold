@@ -1,120 +1,95 @@
-from importlib.resources import read_text
 from typing import Any
 
 from camelsnake import camel_to_snake
 
-from fastscaffold.core.component import ScaffoldComponent
 from fastscaffold.core.context import ScaffoldRunContext
-from fastscaffold.std.configs import ArchitectureConfig, WebProjectConfig
-from fastscaffold.std.gen import SimpleTemplateRender, src_in
-from fastscaffold.std.jinja import Jinja
+from fastscaffold.std.configs import WebProjectConfig
+from fastscaffold.std.gen import (
+    SimpleManyTemplatesRender,
+    SimpleTemplateRender,
+)
 from fastscaffold.std.py.application.persistence import GatewayStore
 from fastscaffold.std.py.domain import EntityStore
 
 
-class AlembicGen(ScaffoldComponent):
+class AlembicGen(SimpleManyTemplatesRender):
     requires_context = [
-        WebProjectConfig,
-        ArchitectureConfig,
+        *SimpleManyTemplatesRender.requires_context,
     ]
+    base_dir = ["infrastructure", "persistence"]
+    templates = {
+        "migrations/env.py": "alembic/env.py.template",
+        "migrations/README": "alembic/README",
+        "migrations/script.py.mako": "alembic/script.py.mako",
+    }
 
-    def build(self, ctx: ScaffoldRunContext) -> None:
-        file = ctx.files[src_in(
-            "infrastructure", "persistence", "migrations", "env.py"
-        )(ctx)]
-        template = ctx[Jinja].env.get_template(
-            f"alembic/env.py.template"
+    def get_jinja_vars(self, ctx: ScaffoldRunContext) -> dict[str, Any]:
+        return super().get_jinja_vars(ctx) | dict(
+            slug=ctx[WebProjectConfig].slug
         )
-        result = template.render(slug=ctx[WebProjectConfig].slug)
-        file.lines.extend(result.splitlines())
-        for template_name in ("README", "script.py.mako"):
-            file = ctx.files[src_in(
-                "infrastructure", "persistence", "migrations", template_name
-            )(ctx)]
-            file.lines.extend(read_text(
-                "fastscaffold.resource", f"std/alembic/{template_name}"
-            ).splitlines())
 
 
-class SqlalchemyModelsGen(ScaffoldComponent):
+class SqlalchemyModelsGen(SimpleTemplateRender):
     requires_context = [
-        WebProjectConfig,
-        ArchitectureConfig,
-        EntityStore
+        *SimpleTemplateRender.requires_context,
+        EntityStore,
     ]
+    location = ["infrastructure", "persistence", "models.py"]
+    template = "sqlalchemy/models.py.template"
 
-    def __init__(self, entities: list):
+    def __init__(self, entities: list[str]) -> None:
         self.entities = entities
 
-    def build(self, ctx: ScaffoldRunContext) -> None:
+    def get_jinja_vars(self, ctx: ScaffoldRunContext) -> dict[str, Any]:
         entities = [
             ctx[EntityStore].entities[entity_name]
             for entity_name in self.entities
         ]
-        file = ctx.files[src_in(
-            "infrastructure", "persistence", "models.py"
-        )(ctx)]
-        template = ctx[Jinja].env.get_template(
-            "sqlalchemy/models.py.template"
-        )
-        result = template.render(entities=entities)
-        file.lines.extend(result.splitlines())
+        return super().get_jinja_vars(ctx) | dict(entities=entities)
 
 
 class UoWWasGenerated: ...
 
 
-class SqlalchemyUoWGen(ScaffoldComponent):
-    requires_context = [
-        WebProjectConfig,
-        ArchitectureConfig,
-    ]
+class SqlalchemyUoWGen(SimpleTemplateRender):
+    requires_context = [*SimpleTemplateRender.requires_context]
+    location = ["infrastructure", "persistence", "uow.py"]
+    template = "sqlalchemy/uow.py.template"
 
-    def build(self, ctx: ScaffoldRunContext) -> None:
-        file = ctx.files[src_in(
-            "infrastructure", "persistence", "uow.py"
-        )(ctx)]
-        template = ctx[Jinja].env.get_template(
-            "sqlalchemy/uow.py.template"
+    def get_jinja_vars(self, ctx: ScaffoldRunContext) -> dict[str, Any]:
+        return super().get_jinja_vars(ctx) | dict(
+            slug=ctx[WebProjectConfig].slug
         )
-        result = template.render(slug=ctx[WebProjectConfig].slug)
-        file.lines.extend(result.splitlines())
+
+    def after_build(self, ctx: ScaffoldRunContext) -> None:
         ctx += UoWWasGenerated()
 
 
-class SqlalchemySimpleGatewayImplGen(ScaffoldComponent):
+class SqlalchemySimpleGatewayImplGen(SimpleTemplateRender):
     requires_context = [
-        WebProjectConfig,
-        ArchitectureConfig,
+        *SimpleTemplateRender.requires_context,
         EntityStore,
         GatewayStore,
-        UoWWasGenerated
+        UoWWasGenerated,
     ]
+    template = "sqlalchemy/simple_gw.py.template"
 
-    def __init__(
-        self,
-        entity_name: str,
-        **options: Any
-    ) -> None:
+    def __init__(self, entity_name: str, **options: Any) -> None:
         self.entity_name = entity_name
         self.options = options
-
-    def build(self, ctx: ScaffoldRunContext) -> None:
-        file = ctx.files[src_in(
+        self.location = [
             "infrastructure",
             "persistence",
-            camel_to_snake(self.entity_name) + ".py"
-        )(ctx)]
-        template = ctx[Jinja].env.get_template(
-            "sqlalchemy/simple_gw.py.template"
-        )
-        result = template.render(
+            f"{camel_to_snake(self.entity_name)}.py",
+        ]
+
+    def get_jinja_vars(self, ctx: ScaffoldRunContext) -> dict[str, Any]:
+        return super().get_jinja_vars(ctx) | dict(
             entity=ctx[EntityStore].entities[self.entity_name],
             gw=ctx[GatewayStore].for_entities[self.entity_name],
             slug=ctx[WebProjectConfig].slug,
-            opt=self.options
+            opt=self.options,
         )
-        file.lines.extend(result.splitlines())
 
 
 class SqlalchemySessionGen(SimpleTemplateRender):

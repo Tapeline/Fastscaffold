@@ -1,0 +1,48 @@
+from abc import abstractmethod
+from collections.abc import Sequence
+from typing import Protocol
+
+{{ entity.import_line }}
+from {{ import_from("application.pagination") }} import PaginationParams
+
+{% if gen_exceptions %}
+class {{ entity.name }}NotFound(Exception):
+    """Raised when entity with such id is not found."""
+
+    def __init__(self, uid: {{ entity.name }}Id) -> None:
+        """Init and set uid."""
+        self.id = uid
+{% endif %}
+
+class {{ entity.name }}Gateway(Protocol):
+    """Access to {{ entity.name|camel_to_snake|replace("_", " ") }}s."""
+{% if "add_get_by_id" in methods %}
+    @abstractmethod
+    async def get_by_id(self, uid: {{ entity.name }}Id) -> {{ entity.name }}:
+        """Get by id."""
+        raise NotImplementedError
+{% endif %}
+{% if "add_delete_by_id" in methods %}
+    @abstractmethod
+    async def delete_by_id(self, uid: {{ entity.name }}Id) -> {{ entity.name }}:
+        """Delete by id."""
+        raise NotImplementedError
+{% endif %}
+{% if "add_save" in methods %}
+    @abstractmethod
+    async def save(self, entity: {{ entity.name }}) -> None:
+        """Save entity."""
+        raise NotImplementedError
+{% endif %}
+{% for method in methods.get("add_get_paginated_filtered", []) %}
+    @abstractmethod
+    async def {{ method.name }}(self, {{ method.args }}) -> Sequence[{{ entity.name }}]:
+        """Get filtered and paginated."""
+        raise NotImplementedError
+{% endfor %}
+{% for method in methods.get("add_get_filtered", []) %}
+    @abstractmethod
+    async def {{ method.name }}(self, {{ method.args }}) -> Sequence[{{ entity.name }}]:
+        """Get filtered."""
+        raise NotImplementedError
+{% endfor %}
