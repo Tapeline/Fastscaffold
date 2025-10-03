@@ -26,6 +26,8 @@ class EntityStore:
 
 
 class EntityGen(SimpleTemplateRender):
+    template = "domain/entity.py.template"
+
     def __init__(
         self,
         *,

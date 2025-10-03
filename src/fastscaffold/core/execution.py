@@ -32,7 +32,11 @@ class ScaffoldExecutor:
         self.components = scaffold_setup(self.ctx)
         for component in self.components:
             self._assert_component_can_run(component)
-            component.build(self.ctx)
+            try:
+                component.build(self.ctx)
+            except Exception:
+                print("Exception while building component", component)
+                raise
         return self._assemble_files()
 
     def _assert_component_can_run(self, component: ScaffoldComponent) -> None:

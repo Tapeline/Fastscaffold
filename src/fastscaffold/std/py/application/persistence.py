@@ -92,10 +92,10 @@ class GatewayInterfaceGen(SimpleTemplateRender):
         cls, name: str, **kwargs
     ) -> dict[str, Any]:
         return {
-            "add_get_paginated_filtered": {
+            "add_get_paginated_filtered": [{
                 "name": name,
                 "args": ", ".join(f"{arg}: {typ}" for arg, typ in kwargs.items())
-            }
+            }]
         }
 
     @classmethod
@@ -103,10 +103,10 @@ class GatewayInterfaceGen(SimpleTemplateRender):
         cls, name: str, **kwargs
     ) -> dict[str, Any]:
         return {
-            "add_get_filtered": {
+            "add_get_filtered": [{
                 "name": name,
                 "args": ", ".join(f"{arg}: {typ}" for arg, typ in kwargs.items())
-            }
+            }]
         }
 
 

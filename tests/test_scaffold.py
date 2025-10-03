@@ -74,8 +74,8 @@ def test():
             UoWInterfaceGen(),
             GatewayInterfaceGen(
                 "User",
-                GatewayInterfaceGen.add_get_by_id,
-                GatewayInterfaceGen.add_save
+                GatewayInterfaceGen.add_get_by_id(),
+                GatewayInterfaceGen.add_save()
             ),
             PaginationDTOGen(),
             UUIDGeneratorInterfaceGen(),
