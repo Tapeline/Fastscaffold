@@ -1,0 +1,21 @@
+{% if with_id %}
+from typing import NewType
+from uuid import UUID
+{% endif %}
+{% if make_dataclass %}
+from dataclasses import dataclass
+{% endif %}
+{% for import_ in add_imports %}
+{{ import_ }}
+{% endfor %}
+{% if with_id %}
+{self.name}Id = NewType("{self.name}Id", UUID)
+{% endif %}
+
+{% if make_dataclass %}@dataclass{% endif %}
+class {{name}}:{% for field_name, field_type in fields.items() %}
+    {{field_name}}: {{field_type}}
+    {% for line in append %}
+    {{line}}
+    {% endfor %}
+
