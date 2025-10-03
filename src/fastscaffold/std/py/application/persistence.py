@@ -9,6 +9,8 @@ from fastscaffold.std.configs import ArchitectureConfig, WebProjectConfig
 from fastscaffold.std.gen import SimpleTemplateRender, import_from
 from fastscaffold.std.py.domain import EntityStore
 
+from src.fastscaffold.misc.merger import merge_all
+
 
 @dataclass
 class GeneratedGateway:
@@ -41,7 +43,7 @@ class GatewayInterfaceGen(SimpleTemplateRender):
     def __init__(
         self,
         entity_name: str,
-        *include: Callable,
+        *include: dict[str, Any],
         gen_exceptions: bool = False,
     ):
         self.entity_name = entity_name
@@ -51,22 +53,14 @@ class GatewayInterfaceGen(SimpleTemplateRender):
             f"{camel_to_snake(entity_name)}.py",
         ]
         self.gen_exceptions = gen_exceptions
-        self.include = include
+        self.include = merge_all({}, *include)
 
     def get_jinja_vars(self, ctx: ScaffoldRunContext) -> dict[str, Any]:
-        methods = defaultdict(list)
-        for method_func in self.include:
-            method_name = method_func.__name__
-            if "add_get_paginated_filtered" in method_name or "add_get_filtered" in method_name:
-                methods[method_name].append(method_func())
-            else:
-                methods[method_name] = True
-
         return super().get_jinja_vars(ctx) | dict(
             entity=ctx[EntityStore].entities[self.entity_name],
             gen_exceptions=self.gen_exceptions,
             import_from=import_from,
-            methods=methods,
+            include=self.include,
         )
 
     def after_build(self, ctx: ScaffoldRunContext) -> None:
@@ -83,37 +77,38 @@ class GatewayInterfaceGen(SimpleTemplateRender):
         )
 
     @staticmethod
-    def add_get_by_id() -> bool:
-        return True
+    def add_get_by_id() -> dict[str, Any]:
+        return {"add_get_by_id": True}
 
     @staticmethod
-    def add_delete_by_id() -> bool:
-        return True
+    def add_delete_by_id() -> dict[str, Any]:
+        return {"add_delete_by_id": True}
 
     @staticmethod
-    def add_save() -> bool:
-        return True
+    def add_save() -> dict[str, Any]:
+        return {"add_save": True}
 
     @classmethod
     def add_get_paginated_filtered(
         cls, name: str, **kwargs
-    ) -> Callable[[], dict[str, Any]]:
-        def generator() -> dict[str, Any]:
-            kwargs["paginate"] = "PaginationParams"
-            args = ", ".join(f"{arg}: {typ}" for arg, typ in kwargs.items())
-            return dict(name=name, args=args)
-
-        return generator
+    ) -> dict[str, Any]:
+        return {
+            "add_get_paginated_filtered": {
+                "name": name,
+                "args": ", ".join(f"{arg}: {typ}" for arg, typ in kwargs.items())
+            }
+        }
 
     @classmethod
     def add_get_filtered(
         cls, name: str, **kwargs
-    ) -> Callable[[], dict[str, Any]]:
-        def generator() -> dict[str, Any]:
-            args = ", ".join(f"{arg}: {typ}" for arg, typ in kwargs.items())
-            return dict(name=name, args=args)
-
-        return generator
+    ) -> dict[str, Any]:
+        return {
+            "add_get_filtered": {
+                "name": name,
+                "args": ", ".join(f"{arg}: {typ}" for arg, typ in kwargs.items())
+            }
+        }
 
 
 class UUIDGeneratorInterfaceGen(SimpleTemplateRender):

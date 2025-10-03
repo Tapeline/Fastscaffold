@@ -82,13 +82,13 @@ def test():
             UUIDGeneratorInterfaceGen(),
             GatewayInterfaceGen(
                 "Note",
-                GatewayInterfaceGen.add_get_by_id,
-                GatewayInterfaceGen.add_save,
+                GatewayInterfaceGen.add_get_by_id(),
+                GatewayInterfaceGen.add_save(),
                 GatewayInterfaceGen.add_get_paginated_filtered(
                     "get_of_user",
                     author_id="UserId"
                 ),
-                GatewayInterfaceGen.add_delete_by_id,
+                GatewayInterfaceGen.add_delete_by_id(),
                 gen_exceptions=True
             ),
             AddImports(

@@ -22,25 +22,25 @@ class {{ entity.name }}Gateway(Protocol):
         """Get by id."""
         raise NotImplementedError
 {% endif %}
-{% if "add_delete_by_id" in methods %}
+{% if include.add_delete_by_id %}
     @abstractmethod
     async def delete_by_id(self, uid: {{ entity.name }}Id) -> {{ entity.name }}:
         """Delete by id."""
         raise NotImplementedError
 {% endif %}
-{% if "add_save" in methods %}
+{% if include.add_save %}
     @abstractmethod
     async def save(self, entity: {{ entity.name }}) -> None:
         """Save entity."""
         raise NotImplementedError
 {% endif %}
-{% for method in methods.get("add_get_paginated_filtered", []) %}
+{% for method in include.get("add_get_paginated_filtered", []) %}
     @abstractmethod
     async def {{ method.name }}(self, {{ method.args }}) -> Sequence[{{ entity.name }}]:
         """Get filtered and paginated."""
         raise NotImplementedError
 {% endfor %}
-{% for method in methods.get("add_get_filtered", []) %}
+{% for method in include.get("add_get_filtered", []) %}
     @abstractmethod
     async def {{ method.name }}(self, {{ method.args }}) -> Sequence[{{ entity.name }}]:
         """Get filtered."""
