@@ -5,6 +5,14 @@ from fastscaffold.std.gen import (
 
 
 class LitestarCommonsGen(SimpleManyTemplatesRender):
+    """
+    Generates common litestar utility files.
+
+    Generates modules and functions to neatly deal with errors,
+    OpenAPI and security definitions.
+
+    """
+
     base_dir = ["presentation", "http"]
     templates = {
         "errors.py": "litestar/errors.py.template",

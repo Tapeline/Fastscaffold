@@ -1,5 +1,4 @@
 import textwrap
-from abc import ABC, abstractmethod
 from collections.abc import Callable
 from typing import Any, ClassVar
 
@@ -131,46 +130,11 @@ class SimpleManyTemplatesRender(ScaffoldComponent):
         self.after_build(ctx)
 
 
-def src_in(where: str, *path: str) -> Callable[[ScaffoldRunContext], str]:
-    return {
-        "domain": lambda ctx: with_src(
-            ctx,
-            ctx[WebProjectConfig].slug,
-            "domain",
-            *path
-        ),
-        "application": lambda ctx: with_src(
-            ctx,
-            ctx[WebProjectConfig].slug,
-            "application",
-            *path
-        ),
-        "infrastructure": lambda ctx: with_src(
-            ctx,
-            ctx[WebProjectConfig].slug,
-            "infrastructure",
-            *path
-        ),
-        "bootstrap": lambda ctx: with_src(
-            ctx,
-            ctx[WebProjectConfig].slug,
-            "bootstrap",
-            *path
-        ),
-        "presentation": lambda ctx: with_src(
-            ctx,
-            ctx[WebProjectConfig].slug,
-            "presentation",
-            *path
-        )
-    }.get(
-        where,
-        lambda ctx: with_src(
-            ctx,
-            ctx[WebProjectConfig].slug,
-            where,
-            *path
-        )
+def src_in(*path: str) -> Callable[[ScaffoldRunContext], str]:
+    return lambda ctx: with_src(
+        ctx,
+        ctx[WebProjectConfig].slug,
+        *path
     )
 
 
