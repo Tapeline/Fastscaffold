@@ -3,7 +3,7 @@ from typing import Final, override, final
 
 {{auth_import}}
 from {{slug}}.application.identifier import UUIDGenerator
-from {{slug}}.application.persistence.uow import UoW
+from {{slug}}.application.persistence.transactions import TransactionManager
 {{gw_import}}
 {{entity.import_line}}
 
@@ -20,13 +20,13 @@ class Create{{entity.name}}Interactor:
 
     {%if with_auth%}user_idp: UserIdProvider{%endif%}
     id_gen: UUIDGenerator
-    uow: UoW
+    transaction: TransactionManager
     {{entity.name|camel_to_snake}}_gw: {{entity.name}}Gateway
 
     async def __call__(self, dto: Create{{entity.name}}DTO) -> {{entity.name}}:
         """Call."""
         {%if with_auth%}user_id = await self.user_idp.get_user(){%endif%}
-        async with self.uow:
+        async with self.transaction:
             {{entity.name|camel_to_snake}} = {{entity.name}}(
                 id=self.id_gen(),{% for field in entity.fields|no_id %}
                 {{field}}=dto.{{field}},{% endfor %}

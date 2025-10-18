@@ -19,7 +19,7 @@ from {{slug}}.infrastructure.persistence.models import (
     UserAuthTokenModel,
     UserModel,
 )
-from {{slug}}.infrastructure.persistence.uow import SAUoW
+from {{slug}}.infrastructure.persistence.transactions import SATransactionManager
 
 
 class PasswordHasher(Protocol):
@@ -74,7 +74,7 @@ class AuthTokenGenerator(Protocol):
 class UserCredentialStoreImpl(UserCredentialStore):
     """Impl."""
 
-    uow: SAUoW
+    transaction: SATransactionManager
     password_hasher: PasswordHasher
     password_comparator: PasswordHashComparator
     token_gen: AuthTokenGenerator
@@ -88,7 +88,7 @@ class UserCredentialStoreImpl(UserCredentialStore):
             hashed_pass=self.password_hasher.hash(password),
         )
         try:
-            await self.uow.session.execute(query)
+            await self.transaction.session.execute(query)
         except IntegrityError as exc:
             raise UserAlreadyExists(user.username) from exc
 
@@ -97,7 +97,7 @@ class UserCredentialStoreImpl(UserCredentialStore):
         query = select(UserModel).where(
             UserModel.username == username
         )
-        result = await self.uow.session.execute(query)
+        result = await self.transaction.session.execute(query)
         user = result.scalars().first()
         if not user:
             return None
@@ -114,7 +114,7 @@ class UserCredentialStoreImpl(UserCredentialStore):
             UserAuthTokenModel.token == token,
             UserAuthTokenModel.issued_at > expiry
         )
-        result = await self.uow.session.execute(query)
+        result = await self.transaction.session.execute(query)
         token_model = result.scalars().first()
         if not token_model:
             return None
@@ -127,7 +127,7 @@ class UserCredentialStoreImpl(UserCredentialStore):
             user_id=user_id,
             token=token
         )
-        await self.uow.session.execute(query)
+        await self.transaction.session.execute(query)
         return token
 
     @override
@@ -135,4 +135,4 @@ class UserCredentialStoreImpl(UserCredentialStore):
         query = delete(UserAuthTokenModel).where(
             UserAuthTokenModel.user_id == user_id
         )
-        await self.uow.session.execute(query)
+        await self.transaction.session.execute(query)

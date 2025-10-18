@@ -2,12 +2,12 @@ from abc import abstractmethod
 from typing import Protocol
 
 
-class UoW(Protocol):
+class TransactionManager(Protocol):
     """A unit of work."""
 
     @abstractmethod
     async def __aenter__(self) -> None:
-        """Init UoW."""
+        """Init TransactionManager."""
 
     @abstractmethod
     async def __aexit__(

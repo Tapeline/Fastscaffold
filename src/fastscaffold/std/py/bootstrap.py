@@ -4,7 +4,7 @@ from typing import Any
 from fastscaffold.core.context import ScaffoldRunContext
 from fastscaffold.std.configs import WebProjectConfig
 from fastscaffold.std.gen import SimpleTemplateRender
-from fastscaffold.std.py.infrastructure.persistence import UoWWasGenerated
+from fastscaffold.std.py.infrastructure.persistence import TransactionManagerWasGenerated
 
 
 @dataclass
@@ -136,23 +136,23 @@ class LitestarAuthProviderGen(SimpleTemplateRender):
         )
 
 
-class UoWProviderGen(SimpleTemplateRender):
+class TransactionManagerProviderGen(SimpleTemplateRender):
     requires_context = [
         *SimpleTemplateRender.requires_context,
-        UoWWasGenerated,
+        TransactionManagerWasGenerated,
     ]
-    location = ["bootstrap", "di", "uow.py"]
-    template = "bootstrap/uow_di_provider.py.template"
+    location = ["bootstrap", "di", "transactions.py"]
+    template = "bootstrap/transactions_di_provider.py.template"
 
     def after_build(self, ctx: ScaffoldRunContext) -> None:
         slug = ctx[WebProjectConfig].slug
         _get_or_create_di_provider_store(ctx).providers.append(
             GeneratedDIProvider(
                 import_line=(
-                    f"from {slug}.bootstrap.di.uow "
-                    f"import UoWDIProvider"
+                    f"from {slug}.bootstrap.di.transactions "
+                    f"import TransactionManagerDIProvider"
                 ),
-                name="UoWDIProvider"
+                name="TransactionManagerDIProvider"
             )
         )
 

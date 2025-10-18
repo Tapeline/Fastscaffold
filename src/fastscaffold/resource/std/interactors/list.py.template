@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Final, override, final
 
 {{auth_import}}
-from {{slug}}.application.persistence.uow import UoW
+from {{slug}}.application.persistence.transactions import TransactionManager
 from {{slug}}.application.pagination import PaginationParams
 {{gw_import}}
 {{entity.import_line}}
@@ -14,12 +14,12 @@ class List{{entity.name}}Interactor:
     """List {{entity.name|camel_to_human}}."""
 
     {%if with_auth%}user_idp: UserIdProvider{%endif%}
-    uow: UoW
+    transaction: TransactionManager
     {{entity.name|camel_to_snake}}_gw: {{entity.name}}Gateway
 
     async def __call__(self, paginate: PaginationParams) -> list[{{entity.name}}]:
         """Call."""
         {%if with_auth%}user_id = await self.user_idp.get_user(){%endif%}
-        async with self.uow:
+        async with self.transaction:
             {{entity.name|camel_to_snake}}s = await self.{{entity.name|camel_to_snake}}_gw.{{gw_method}}(paginate)
             return list({{entity.name|camel_to_snake}}s)

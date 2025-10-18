@@ -19,7 +19,7 @@ from fastscaffold.std.py.application.interactors import (
 )
 from fastscaffold.std.py.application.persistence import (
     PaginationDTOGen,
-    UUIDGeneratorInterfaceGen, UoWInterfaceGen,
+    TransactionManagerInterfaceGen, UUIDGeneratorInterfaceGen,
 )
 from fastscaffold.std.py.application.persistence import GatewayInterfaceGen
 from fastscaffold.std.py.bootstrap import (
@@ -28,8 +28,7 @@ from fastscaffold.std.py.bootstrap import (
     DEFAULT_PG_CONF,
     DEFAULT_SECURITY_CONF,
     LitestarAppGen,
-    LitestarAuthProviderGen,
-    UoWProviderGen,
+    LitestarAuthProviderGen, TransactionManagerProviderGen,
 )
 from fastscaffold.std.py.configs import PyQAConfigsGen, PyprojectGen
 from fastscaffold.std.py.domain import EntityGen
@@ -38,7 +37,7 @@ from fastscaffold.std.py.infrastructure.persistence import (
     SqlalchemyModelsGen,
     SqlalchemySecurityGen, SqlalchemySessionGen,
     SqlalchemySimpleGatewayImplGen,
-    SqlalchemyUoWGen, UUIDGeneratorImplGen,
+    SqlalchemyTransactionManagerGen, UUIDGeneratorImplGen,
 )
 from fastscaffold.std.py.presentation.litestar import (
     LitestarCommonUserEndpointsGen,
@@ -71,7 +70,7 @@ def test():
                     "from notetaker.domain.user import UserId"
                 ],
             ),
-            UoWInterfaceGen(),
+            TransactionManagerInterfaceGen(),
             GatewayInterfaceGen(
                 "User",
                 GatewayInterfaceGen.add_get_by_id(),
@@ -104,7 +103,7 @@ def test():
                 "Note", with_auth=False, gw_list_method="get_of_user"
             ),
             AlembicGen(),
-            SqlalchemyUoWGen(),
+            SqlalchemyTransactionManagerGen(),
             SqlalchemyModelsGen(["User", "Note"]),
             SqlalchemySimpleGatewayImplGen(
                 "User",
@@ -131,7 +130,7 @@ def test():
             ConfigDIProviderGen(),
             AlgoDIProviderGen(),
             LitestarAuthProviderGen(),
-            UoWProviderGen(),
+            TransactionManagerProviderGen(),
             LitestarAppGen(),
             PyprojectGen(),
             PyQAConfigsGen(),

@@ -23,9 +23,9 @@ class GatewayStore:
     for_entities: dict[str, GeneratedGateway]
 
 
-class UoWInterfaceGen(SimpleTemplateRender):
-    location = ["application", "persistence", "uow.py"]
-    template = "application/uow.py.template"
+class TransactionManagerInterfaceGen(SimpleTemplateRender):
+    location = ["application", "persistence", "transactions.py"]
+    template = "application/transactions.py.template"
 
 
 class PaginationDTOGen(SimpleTemplateRender):

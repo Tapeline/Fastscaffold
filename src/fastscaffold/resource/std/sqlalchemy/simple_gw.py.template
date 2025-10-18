@@ -6,16 +6,16 @@ from sqlalchemy.exc import NoResultFound
 {{entity.import_line}}
 {{gw.import_line}}{% if opt.get_by_id %}, {{entity.name}}NotFound{% endif %}
 from {{slug}}.infrastructure.persistence.models import {{entity.name}}Model
-from {{slug}}.infrastructure.persistence.uow import SAUoW
+from {{slug}}.infrastructure.persistence.transactions import SATransactionManager
 
 
 class Sql{{entity.name}}Gateway({{entity.name}}Gateway):
-    uow: SAUoW
+    transaction: SATransactionManager
     {% if opt.get_by_id %}
     @override
     async def get_by_id(self, uid: {{entity.name}}Id) -> {{entity.name}}:
         query = select({{entity.name}}Model).where({{entity.name}}Model.uuid == uid)
-        result = await self.uow.execute(query)
+        result = await self.transaction.execute(query)
         try:
             return _convert_to_{{entity.name|camel_to_snake}}(result.scalars().one())
         except NoResultFound as exc:
@@ -25,7 +25,7 @@ class Sql{{entity.name}}Gateway({{entity.name}}Gateway):
     @override
     async def save(self, entity: {{entity.name}}) -> None:
         model = _convert_to_{{entity.name|camel_to_snake}}_model(entity)
-        self.uow.add(model)
+        self.transaction.add(model)
     {% endif %}
 
 

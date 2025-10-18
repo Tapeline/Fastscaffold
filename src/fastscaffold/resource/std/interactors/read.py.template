@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Final, override, final
 
 {{auth_import}}
-from {{slug}}.application.persistence.uow import UoW
+from {{slug}}.application.persistence.transactions import TransactionManager
 {{gw_import}}
 {{entity.import_line}}
 
@@ -13,12 +13,12 @@ class Get{{entity.name}}Interactor:
     """Get {{entity.name|camel_to_human}}."""
 
     {%if with_auth%}user_idp: UserIdProvider{%endif%}
-    uow: UoW
+    transaction: TransactionManager
     {{entity.name|camel_to_snake}}_gw: {{entity.name}}Gateway
 
     async def __call__(self, uid: {{entity.name}}Id) -> {{entity.name}}:
         """Call."""
         {%if with_auth%}user_id = await self.user_idp.get_user(){%endif%}
-        async with self.uow:
+        async with self.transaction:
             {{entity.name|camel_to_snake}} = await self.{{entity.name|camel_to_snake}}_gw.get_by_id(uid)
             return {{entity.name|camel_to_snake}}

@@ -3,7 +3,7 @@ from typing import final
 
 from {{slug}}.application.auth.auth import UserCredentialStore
 from {{slug}}.application.identifier import UUIDGenerator
-from {{slug}}.application.persistence.uow import UoW
+from {{slug}}.application.persistence.transactions import TransactionManager
 {{user.import_line}}
 
 
@@ -14,14 +14,14 @@ class RegisterInteractor:
 
     user_cred_store: UserCredentialStore
     id_gen: UUIDGenerator
-    uow: UoW
+    transaction: TransactionManager
 
     async def __call__(
         self,
         username: str,
         password: str
     ) -> User:
-        async with self.uow:
+        async with self.transaction:
             user = User(
                 id=self.id_gen(),
                 username=username,

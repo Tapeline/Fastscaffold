@@ -2,15 +2,15 @@ from typing import Any, final, override
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from {{slug}}.application.persistence.uow import UoW
+from {{slug}}.application.persistence.transactions import TransactionManager
 
 
 @final
-class SAUoW(UoW):
+class SATransactionManager(TransactionManager):
     """Impl."""
 
     def __init__(self, session: AsyncSession) -> None:
-        """Init the UoW."""
+        """Init the TransactionManager."""
         self.session = session
         self.execute = session.execute
         self.add = session.add
