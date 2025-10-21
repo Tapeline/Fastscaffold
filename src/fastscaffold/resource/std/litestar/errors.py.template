@@ -16,4 +16,5 @@ handlers: Final = gen_handler_mapping({
     UserNotFound: (404, infer_code),
     UserCredsNotFound: (401, infer_code),
     UserNotAuthenticated: (401, infer_code),
+    # TODO: add your exceptions here
 })

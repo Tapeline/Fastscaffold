@@ -1,3 +1,5 @@
-[report]
-exclude_also =
-    assert_never
+[run]
+plugins = smart_covdefaults
+
+[smart_covdefaults]
+allow_defensive_code = True

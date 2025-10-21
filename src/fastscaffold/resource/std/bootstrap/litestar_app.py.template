@@ -9,16 +9,21 @@ from dishka.integrations.litestar import (
 from litestar import Litestar
 from litestar.config.cors import CORSConfig
 from litestar.logging import LoggingConfig
+{% if component.add_prometheus %}
+from litestar.plugins.prometheus import PrometheusConfig, PrometheusController
+{% endif %}
 
 {% for di_provider in di_providers %}{{di_provider.import_line}}
 {% endfor %}
 from {{slug}}.config import Config
+from {{slug}}.bootstrap.config import service_config_loader
+from {{slug}}.bootstrap.logging import get_structlog_plugin_def
 from {{slug}}.presentation.http.errors import handlers
 from {{slug}}.presentation.http.openapi import app_openapi_config
 
 
 def _create_config() -> Config:
-    return Config()
+    return service_config_loader.load()
 
 
 def _create_container(config: Config) -> AsyncContainer:
@@ -39,36 +44,33 @@ def _select_event_loop() -> None:
         )
 
 
-def _create_logging_config() -> LoggingConfig:
-    return LoggingConfig(
-        root={"level": "INFO", "handlers": ["queue_listener"]},
-        formatters={
-            "standard": {
-                "format": (
-                    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-                )
-            }
-        },
-        log_exceptions="always",
-    )
-
-
 def create_app() -> Litestar:
     """Bootstrap the app."""
     _select_event_loop()
     config = _create_config()
     container = _create_container(config)
-    logging_config = _create_logging_config()
+    {% if component.add_prometheus %}
+    prometheus_config = PrometheusConfig(
+        app_name="{{slug}}",
+        group_path=True,
+        exclude=["/metrics"],
+    )
+    {% endif %}
     litestar_app = Litestar(
         debug=True,
         route_handlers=[
             # TODO fill this
+            {% if component.add_prometheus %}PrometheusController,{% endif %}
         ],
-        middleware=[],
+        middleware=[
+            {% if component.add_prometheus %}prometheus_config.middleware,{% endif %}
+        ],
         exception_handlers=handlers,  # type: ignore
         openapi_config=app_openapi_config,
-        logging_config=logging_config,
-        cors_config=CORSConfig(allow_origins=["*"])
+        cors_config=CORSConfig(allow_origins=["*"]),
+        plugins=[
+            get_structlog_plugin_def({% if "Logging" in ctx["ConfigStore"].name_mapped %}config.logging.use_json{% endif %}),
+        ],
     )
     litestar_setup_dishka(container, litestar_app)
     return litestar_app

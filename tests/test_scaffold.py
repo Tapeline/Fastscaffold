@@ -23,12 +23,16 @@ from fastscaffold.std.py.application.persistence import (
 )
 from fastscaffold.std.py.application.persistence import GatewayInterfaceGen
 from fastscaffold.std.py.bootstrap import (
-    AlgoDIProviderGen, ConfigDIProviderGen,
+    AlgoDIProviderGen,
+    ConfigDIProviderGen,
     ConfigGen,
-    DEFAULT_PG_CONF,
+    DEFAULT_LOGGING_CONF, DEFAULT_PG_CONF,
     DEFAULT_SECURITY_CONF,
+    FuenteConfigLoaderGen,
     LitestarAppGen,
-    LitestarAuthProviderGen, TransactionManagerProviderGen,
+    LitestarAuthProviderGen,
+    LitestarStructlogLoggingGen,
+    TransactionManagerProviderGen,
 )
 from fastscaffold.std.py.configs import PyQAConfigsGen, PyprojectGen
 from fastscaffold.std.py.domain import EntityGen
@@ -126,12 +130,15 @@ def test():
             ConfigGen(
                 DEFAULT_PG_CONF,
                 DEFAULT_SECURITY_CONF,
+                DEFAULT_LOGGING_CONF,
             ),
             ConfigDIProviderGen(),
             AlgoDIProviderGen(),
             LitestarAuthProviderGen(),
             TransactionManagerProviderGen(),
-            LitestarAppGen(),
+            FuenteConfigLoaderGen(),
+            LitestarStructlogLoggingGen(),
+            LitestarAppGen(add_prometheus=True),
             PyprojectGen(),
             PyQAConfigsGen(),
         ]

@@ -1,16 +1,21 @@
 from collections import defaultdict
 from collections.abc import Iterator
-from typing import Any, Never, Self
+from typing import Any, Never, Self, overload
 
 from fastscaffold.core.files import ScaffoldFile
 
 
 class ContextNotFoundError(Exception):
-    def __init__(self, ctx_type: type[Any]) -> None:
+    def __init__(self, ctx_type: type[Any] | str) -> None:
         self.ctx_type = ctx_type
 
     def __str__(self) -> str:
-        return f"Could not find context of type {self.ctx_type.__qualname__}"
+        ctx_name = (
+            f"<string reference> {self.ctx_type}"
+            if isinstance(self.ctx_type, str)
+            else self.ctx_type.__qualname__
+        )
+        return f"Could not find context of type {ctx_name}"
 
 
 class DuplicateContextError(Exception):
@@ -26,13 +31,21 @@ class DuplicateContextError(Exception):
 
 class ScaffoldContext:
     def __init__(self, *contexts: Any) -> None:
-        self._contexts = {
+        self._contexts: dict[type[Any] | str, Any] = {
             type(ctx): ctx for ctx in contexts
         }
 
     def get_ctx[Ctx_T](
-            self, typ: type[Ctx_T], default: Ctx_T = Never
+        self, typ: type[Ctx_T] | str, default: Ctx_T = Never
     ) -> Ctx_T:
+        if isinstance(typ, str):
+            if typ in self._contexts:
+                return self._contexts[typ]
+            for ctx_type in self._contexts:
+                if ctx_type.__name__ == typ:
+                    return self._contexts[ctx_type]
+            else:
+                raise ContextNotFoundError(typ)
         if typ not in self._contexts:
             if default is Never:
                 raise ContextNotFoundError(typ)
@@ -40,7 +53,7 @@ class ScaffoldContext:
                 return default
         return self._contexts[typ]
 
-    def __getitem__[Ctx_T](self, typ: type[Ctx_T]) -> Ctx_T:
+    def __getitem__[Ctx_T](self, typ: type[Ctx_T] | str) -> Ctx_T:
         return self.get_ctx(typ)
 
     def add_ctx(self, ctx: Any) -> None:
@@ -48,7 +61,13 @@ class ScaffoldContext:
             raise DuplicateContextError(ctx)
         self._contexts[type(ctx)] = ctx
 
-    def __setitem__[Ctx_T](self, key: type[Ctx_T], value: Ctx_T):
+    @overload
+    def __setitem__[Ctx_T](self, key: type[Ctx_T], value: Ctx_T): ...
+
+    @overload
+    def __setitem__(self, key: str, value: Any): ...
+
+    def __setitem__[Ctx_T](self, key: type[Ctx_T] | str, value: Ctx_T | Any):
         self._contexts[key] = value
 
     def __iadd__(self, ctx: Any) -> Self:
@@ -59,7 +78,10 @@ class ScaffoldContext:
         return item in self._contexts
 
     def __iter__(self) -> Iterator[Any]:
-        return iter(self._contexts.values())
+        return iter(
+            ctx for key, ctx in self._contexts.items()
+            if isinstance(key, type)
+        )
 
 
 class DefaultFileDict(dict[str, ScaffoldFile]):
