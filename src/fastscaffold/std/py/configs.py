@@ -18,3 +18,8 @@ class PyQAConfigsGen(SimpleManyTemplatesRender):
         "pytest.ini": "configs/pytest.ini.template",
         "ruff.toml": "configs/ruff.toml.template",
     }
+
+
+class JustfileGen(SimpleTemplateRender):
+    location = ["..", "..", "justfile"]
+    template = "configs/justfile.template"

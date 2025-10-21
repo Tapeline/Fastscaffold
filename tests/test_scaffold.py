@@ -34,7 +34,11 @@ from fastscaffold.std.py.bootstrap import (
     LitestarStructlogLoggingGen,
     TransactionManagerProviderGen,
 )
-from fastscaffold.std.py.configs import PyQAConfigsGen, PyprojectGen
+from fastscaffold.std.py.configs import (
+    JustfileGen,
+    PyQAConfigsGen,
+    PyprojectGen,
+)
 from fastscaffold.std.py.domain import EntityGen
 from fastscaffold.std.py.infrastructure.persistence import (
     AlembicGen,
@@ -47,6 +51,7 @@ from fastscaffold.std.py.presentation.litestar import (
     LitestarCommonUserEndpointsGen,
     LitestarCommonsGen,
 )
+from fastscaffold.std.py.tests import SuperSimpleTestsTemplateGen
 
 
 def test():
@@ -141,6 +146,8 @@ def test():
             LitestarAppGen(add_prometheus=True),
             PyprojectGen(),
             PyQAConfigsGen(),
+            SuperSimpleTestsTemplateGen(),
+            JustfileGen(),
         ]
 
     executor = ScaffoldExecutor()
