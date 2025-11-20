@@ -1,0 +1,13 @@
+import pytest
+
+from {{slug}}.config import ({% for config in ctx["ConfigStore"].configs %}
+    {{config.name}},{%endfor%}
+    Config
+)
+
+
+@pytest.fixture
+def test_config() -> Config:
+    return Config({% for config in ctx["ConfigStore"].configs %}
+        {{config.simple_name|camel_to_snake}}= {{config.name}}(),{%endfor%}
+    )

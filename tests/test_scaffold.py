@@ -19,31 +19,39 @@ from fastscaffold.std.py.application.interactors import (
 )
 from fastscaffold.std.py.application.persistence import (
     PaginationDTOGen,
-    UUIDGeneratorInterfaceGen, UoWInterfaceGen,
+    TransactionManagerInterfaceGen, UUIDGeneratorInterfaceGen,
 )
 from fastscaffold.std.py.application.persistence import GatewayInterfaceGen
 from fastscaffold.std.py.bootstrap import (
-    AlgoDIProviderGen, ConfigDIProviderGen,
+    AlgoDIProviderGen,
+    ConfigDIProviderGen,
     ConfigGen,
-    DEFAULT_PG_CONF,
+    DEFAULT_LOGGING_CONF, DEFAULT_PG_CONF,
     DEFAULT_SECURITY_CONF,
+    FuenteConfigLoaderGen,
     LitestarAppGen,
     LitestarAuthProviderGen,
-    UoWProviderGen,
+    LitestarStructlogLoggingGen,
+    TransactionManagerProviderGen,
 )
-from fastscaffold.std.py.configs import PyQAConfigsGen, PyprojectGen
+from fastscaffold.std.py.configs import (
+    JustfileGen,
+    PyQAConfigsGen,
+    PyprojectGen,
+)
 from fastscaffold.std.py.domain import EntityGen
 from fastscaffold.std.py.infrastructure.persistence import (
     AlembicGen,
     SqlalchemyModelsGen,
     SqlalchemySecurityGen, SqlalchemySessionGen,
     SqlalchemySimpleGatewayImplGen,
-    SqlalchemyUoWGen, UUIDGeneratorImplGen,
+    SqlalchemyTransactionManagerGen, UUIDGeneratorImplGen,
 )
 from fastscaffold.std.py.presentation.litestar import (
     LitestarCommonUserEndpointsGen,
     LitestarCommonsGen,
 )
+from fastscaffold.std.py.tests import SuperSimpleTestsTemplateGen
 
 
 def test():
@@ -71,11 +79,11 @@ def test():
                     "from notetaker.domain.user import UserId"
                 ],
             ),
-            UoWInterfaceGen(),
+            TransactionManagerInterfaceGen(),
             GatewayInterfaceGen(
                 "User",
-                GatewayInterfaceGen.add_get_by_id,
-                GatewayInterfaceGen.add_save
+                GatewayInterfaceGen.add_get_by_id(),
+                GatewayInterfaceGen.add_save()
             ),
             PaginationDTOGen(),
             UUIDGeneratorInterfaceGen(),
@@ -104,7 +112,7 @@ def test():
                 "Note", with_auth=False, gw_list_method="get_of_user"
             ),
             AlembicGen(),
-            SqlalchemyUoWGen(),
+            SqlalchemyTransactionManagerGen(),
             SqlalchemyModelsGen(["User", "Note"]),
             SqlalchemySimpleGatewayImplGen(
                 "User",
@@ -127,14 +135,19 @@ def test():
             ConfigGen(
                 DEFAULT_PG_CONF,
                 DEFAULT_SECURITY_CONF,
+                DEFAULT_LOGGING_CONF,
             ),
             ConfigDIProviderGen(),
             AlgoDIProviderGen(),
             LitestarAuthProviderGen(),
-            UoWProviderGen(),
-            LitestarAppGen(),
+            TransactionManagerProviderGen(),
+            FuenteConfigLoaderGen(),
+            LitestarStructlogLoggingGen(),
+            LitestarAppGen(add_prometheus=True),
             PyprojectGen(),
             PyQAConfigsGen(),
+            SuperSimpleTestsTemplateGen(),
+            JustfileGen(),
         ]
 
     executor = ScaffoldExecutor()

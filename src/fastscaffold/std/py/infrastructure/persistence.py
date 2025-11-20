@@ -48,13 +48,13 @@ class SqlalchemyModelsGen(SimpleTemplateRender):
         return super().get_jinja_vars(ctx) | dict(entities=entities)
 
 
-class UoWWasGenerated: ...
+class TransactionManagerWasGenerated: ...
 
 
-class SqlalchemyUoWGen(SimpleTemplateRender):
+class SqlalchemyTransactionManagerGen(SimpleTemplateRender):
     requires_context = [*SimpleTemplateRender.requires_context]
-    location = ["infrastructure", "persistence", "uow.py"]
-    template = "sqlalchemy/uow.py.template"
+    location = ["infrastructure", "persistence", "transactions.py"]
+    template = "sqlalchemy/transactions.py.template"
 
     def get_jinja_vars(self, ctx: ScaffoldRunContext) -> dict[str, Any]:
         return super().get_jinja_vars(ctx) | dict(
@@ -62,7 +62,7 @@ class SqlalchemyUoWGen(SimpleTemplateRender):
         )
 
     def after_build(self, ctx: ScaffoldRunContext) -> None:
-        ctx += UoWWasGenerated()
+        ctx += TransactionManagerWasGenerated()
 
 
 class SqlalchemySimpleGatewayImplGen(SimpleTemplateRender):
@@ -70,7 +70,7 @@ class SqlalchemySimpleGatewayImplGen(SimpleTemplateRender):
         *SimpleTemplateRender.requires_context,
         EntityStore,
         GatewayStore,
-        UoWWasGenerated,
+        TransactionManagerWasGenerated,
     ]
     template = "sqlalchemy/simple_gw.py.template"
 

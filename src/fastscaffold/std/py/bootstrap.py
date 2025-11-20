@@ -1,10 +1,12 @@
 from dataclasses import dataclass, field
 from typing import Any
 
+from fastscaffold.core.component import ScaffoldComponent
 from fastscaffold.core.context import ScaffoldRunContext
+from fastscaffold.core.files import ScaffoldFile
 from fastscaffold.std.configs import WebProjectConfig
-from fastscaffold.std.gen import SimpleTemplateRender
-from fastscaffold.std.py.infrastructure.persistence import UoWWasGenerated
+from fastscaffold.std.gen import SimpleTemplateRender, src_in
+from fastscaffold.std.py.infrastructure.persistence import TransactionManagerWasGenerated
 
 
 @dataclass
@@ -56,11 +58,27 @@ DEFAULT_SECURITY_CONF = GeneratedConfig(
         token_lifetime="timedelta(hours=48)"
     )
 )
+DEFAULT_LOGGING_CONF = GeneratedConfig(
+    "Logging",
+    fields=dict(
+        use_json="bool",
+    ),
+    defaults=dict(
+        use_json="False"
+    )
+)
 
 
 @dataclass
 class ConfigStore:
     configs: list[GeneratedConfig]
+
+    @property
+    def name_mapped(self) -> dict[str, GeneratedConfig]:
+        return {
+            config.simple_name: config
+            for config in self.configs
+        }
 
 
 class LitestarAppGen(SimpleTemplateRender):
@@ -71,9 +89,13 @@ class LitestarAppGen(SimpleTemplateRender):
     location = ["bootstrap", "app.py"]
     template = "bootstrap/litestar_app.py.template"
 
+    def __init__(self, *, add_prometheus: bool = False) -> None:
+        super().__init__()
+        self.add_prometheus = add_prometheus
+
     def get_jinja_vars(self, ctx: ScaffoldRunContext) -> dict[str, Any]:
         return super().get_jinja_vars(ctx) | dict(
-            di_providers=ctx[DIProviderStore].providers
+            di_providers=ctx[DIProviderStore].providers,
         )
 
 
@@ -136,23 +158,23 @@ class LitestarAuthProviderGen(SimpleTemplateRender):
         )
 
 
-class UoWProviderGen(SimpleTemplateRender):
+class TransactionManagerProviderGen(SimpleTemplateRender):
     requires_context = [
         *SimpleTemplateRender.requires_context,
-        UoWWasGenerated,
+        TransactionManagerWasGenerated,
     ]
-    location = ["bootstrap", "di", "uow.py"]
-    template = "bootstrap/uow_di_provider.py.template"
+    location = ["bootstrap", "di", "transactions.py"]
+    template = "bootstrap/transactions_di_provider.py.template"
 
     def after_build(self, ctx: ScaffoldRunContext) -> None:
         slug = ctx[WebProjectConfig].slug
         _get_or_create_di_provider_store(ctx).providers.append(
             GeneratedDIProvider(
                 import_line=(
-                    f"from {slug}.bootstrap.di.uow "
-                    f"import UoWDIProvider"
+                    f"from {slug}.bootstrap.di.transactions "
+                    f"import TransactionManagerDIProvider"
                 ),
-                name="UoWDIProvider"
+                name="TransactionManagerDIProvider"
             )
         )
 
@@ -172,3 +194,22 @@ class AlgoDIProviderGen(SimpleTemplateRender):
                 name="AlgorithmsDIProvider"
             )
         )
+
+
+class FuenteConfigLoaderGen(SimpleTemplateRender):
+    location = ["bootstrap", "config.py"]
+    template = "bootstrap/fuente_config_loader.py.template"
+
+    def build(self, ctx: ScaffoldRunContext) -> None:
+        super().build(ctx)
+        cfg_filename = f"{ctx[WebProjectConfig].slug}.yml"
+        ctx.files[cfg_filename] = ScaffoldFile(
+            cfg_filename,
+            ["# TODO: fill config"],
+            ctx
+        )
+
+
+class LitestarStructlogLoggingGen(SimpleTemplateRender):
+    location = ["bootstrap", "logging.py"]
+    template = "bootstrap/litestar_structlog_logging.py.template"

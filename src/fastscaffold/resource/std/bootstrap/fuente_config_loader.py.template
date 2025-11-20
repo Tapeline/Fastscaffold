@@ -1,0 +1,11 @@
+from fuente import config_loader
+from fuente.sources.env import EnvSource
+from fuente.sources.yaml import YamlSource
+
+from {{ slug }}.config import Config
+
+service_config_loader = config_loader(
+    YamlSource("{{slug}}.yml"),
+    EnvSource(prefix="{{slug|upper}}_", sep="__"),
+    config=Config,
+)

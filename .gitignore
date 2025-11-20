@@ -1,0 +1,6 @@
+tests/generated*/
+.gemini/.env
+.idea
+*.egg-info
+.venv
+__pycache__

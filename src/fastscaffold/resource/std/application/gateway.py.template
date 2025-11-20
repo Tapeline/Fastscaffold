@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from typing import Protocol
 
 {{ entity.import_line }}
-from {{ import_from("application.pagination") }} import PaginationParams
+from {{slug}}.application.pagination import PaginationParams
 
 {% if gen_exceptions %}
 class {{ entity.name }}NotFound(Exception):
@@ -16,7 +16,7 @@ class {{ entity.name }}NotFound(Exception):
 
 class {{ entity.name }}Gateway(Protocol):
     """Access to {{ entity.name|camel_to_snake|replace("_", " ") }}s."""
-{% if "add_get_by_id" in methods %}
+{% if include.add_get_by_id %}
     @abstractmethod
     async def get_by_id(self, uid: {{ entity.name }}Id) -> {{ entity.name }}:
         """Get by id."""

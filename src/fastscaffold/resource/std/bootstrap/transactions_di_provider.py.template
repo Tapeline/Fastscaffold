@@ -5,11 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from {{slug}}.config import Config
 from {{slug}}.infrastructure.persistence.database import new_session_maker
-from {{slug}}.infrastructure.persistence.uow import SAUoW
+from {{slug}}.infrastructure.persistence.transactions import SATransactionManager
 
 
-class UoWDIProvider(Provider):
-    """Provides sessions and UoWs."""
+class TransactionManagerDIProvider(Provider):
+    """Provides sessions and TransactionManagers."""
 
     @provide(scope=Scope.APP)
     def get_session_maker(
@@ -19,10 +19,10 @@ class UoWDIProvider(Provider):
         return new_session_maker(config.postgres)
 
     @provide(scope=Scope.REQUEST)
-    async def get_uow(
+    async def get_transaction(
         self,
         session_maker: async_sessionmaker[AsyncSession]
-    ) -> AsyncIterable[WithParents[SAUoW]]:
-        """Provide UoW."""
+    ) -> AsyncIterable[WithParents[SATransactionManager]]:
+        """Provide TransactionManager."""
         async with session_maker() as session:
-            yield SAUoW(session)
+            yield SATransactionManager(session)

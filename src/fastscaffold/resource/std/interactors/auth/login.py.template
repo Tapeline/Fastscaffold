@@ -6,7 +6,7 @@ from {{slug}}.application.auth.auth import (
     UserCredentialStore,
 )
 from {{slug}}.application.auth.exceptions import UserCredsNotFound
-from {{slug}}.application.persistence.uow import UoW
+from {{slug}}.application.persistence.transactions import TransactionManager
 
 
 @dataclass
@@ -15,7 +15,7 @@ class LoginInteractor:
     """Login a user and return auth token."""
 
     user_cred_store: UserCredentialStore
-    uow: UoW
+    transaction: TransactionManager
 
     async def __call__(
         self,
@@ -23,7 +23,7 @@ class LoginInteractor:
         password: str
     ) -> AuthToken:
         """Call."""
-        async with self.uow:
+        async with self.transaction:
             user_id = await self.user_cred_store.login_user(
                 username, password
             )

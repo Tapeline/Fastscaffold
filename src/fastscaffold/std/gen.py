@@ -69,7 +69,9 @@ class SimpleTemplateRender(ScaffoldComponent):
     def get_jinja_vars(self, ctx: ScaffoldRunContext) -> dict[str, Any]:
         return dict(
             web_project=ctx[WebProjectConfig],
-            slug=ctx[WebProjectConfig].slug
+            slug=ctx[WebProjectConfig].slug,
+            ctx=ctx,
+            component=self,
         )
 
     def before_build(self, ctx: ScaffoldRunContext) -> None:
@@ -105,7 +107,9 @@ class SimpleManyTemplatesRender(ScaffoldComponent):
     def get_jinja_vars(self, ctx: ScaffoldRunContext) -> dict[str, Any]:
         return dict(
             web_project=ctx[WebProjectConfig],
-            slug=ctx[WebProjectConfig].slug
+            slug=ctx[WebProjectConfig].slug,
+            ctx=ctx,
+            component=self,
         )
 
     def before_build(self, ctx: ScaffoldRunContext) -> None:

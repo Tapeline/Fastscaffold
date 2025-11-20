@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import final
 
 from {{slug}}.application.auth.auth import UserIdProvider
-from {{slug}}.application.persistence.uow import UoW
+from {{slug}}.application.persistence.transactions import TransactionManager
 {{user_gw.import_line}}
 {{user.import_line}}
 
@@ -12,13 +12,13 @@ from {{slug}}.application.persistence.uow import UoW
 class GetProfileInteractor:
     """Get user's profile."""
 
-    uow: UoW
+    transaction: TransactionManager
     user_gw: {{user_gw.name}}
     user_idp: UserIdProvider
 
     @impl
     async def __call__(self) -> User:
-        async with self.uow:
+        async with self.transaction:
             return await self.user_gw.get_by_id(
                 await self.user_idp.get_user()
             )

@@ -1,19 +1,19 @@
 from abc import abstractmethod
-from typing import Protocol
+from typing import Protocol, Any
 
 
-class UoW(Protocol):
+class TransactionManager(Protocol):
     """A unit of work."""
 
     @abstractmethod
     async def __aenter__(self) -> None:
-        """Init UoW."""
+        """Init TransactionManager."""
 
     @abstractmethod
     async def __aexit__(
-            self,
-            exc_type: type[Exception],
-            exc_val: Exception,
-            exc_tb: Any
+        self,
+        exc_type: type[Exception],
+        exc_val: Exception,
+        exc_tb: Any
     ) -> None:
         """Rollback or commit."""
