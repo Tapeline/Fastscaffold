@@ -4,7 +4,7 @@ from litestar import Request
 from litestar.openapi.spec import SecurityScheme
 
 from {{slug}}.application.auth.auth import (
-    TokenCredStoreIdProvider,
+    SessionCredStoreIdProvider,
     UserCredentialStore,
     UserIdProvider,
 )
@@ -39,7 +39,7 @@ def authenticate_user(
     if auth_header:
         auth_header = str(auth_header).removeprefix("Bearer").strip()
     session_id = request.cookies.get("SESSION_ID")
-    return TokenCredStoreIdProvider(
+    return SessionCredStoreIdProvider(
         cred_store=cred_store,
         token=auth_header or session_id or ""
     )

@@ -8,66 +8,47 @@ nav:
   - Components:
       - Domain:
           - Entity: components/domain/entity.md
+      - Presentation:
+          - Litestar: components/presentation/litestar.md
   - Contributing: contributing.md
 
 theme:
-  # took that from faststream
-  name: material
-  font:
-    text: Roboto
-  palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      #primary: custom
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      #primary: custom
-      toggle:
-        icon: material/brightness-4
-        name: Switch to light mode
-  features:
-    - search.suggest
-    - search.highlight
-    - navigation.tabs
-    - navigation.tabs.sticky
-    - navigation.tracking     e url
-    - navigation.prune
-    - navigation.top
-    - navigation.footer
-    - navigation.path
-    - content.tabs.link
-    - content.tooltips
-    - content.code.copy
-    - content.code.annotate
-    - content.code.select
-    - content.action.edit
+  name: material2014
+  primary_color: "#03A9F4"
 
 plugins:
   - macros:
-      module_name: docs.macros
-  - autorefs
+      module_name: docs/macros
+  - mermaid2
+  - ezglossary:
+      tooltip: full
   - search:
       separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
 
 markdown_extensions:
   - toc:
-      permalink: "#"             # replace TOC block symbol
       toc_depth: 3
-  - mdx_include:
-      base_path: .
-      line_slice_separator: []
   - extra
   - admonition
   - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:mermaid2.fence_mermaid_custom
   - pymdownx.highlight:
       anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
   - pymdownx.inlinehilite
-  - pymdownx.tabbed:
-      alternate_style: true
-  - pymdownx.superfences
   - attr_list
   - md_in_html
   - def_list
+  - material2014.extensions.tabbed
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.tasklist:
+      custom_checkbox: true

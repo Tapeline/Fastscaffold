@@ -9,14 +9,14 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 
 from {{slug}}.application.auth.auth import (
-    AuthToken,
+    AuthSession,
     UserCredentialStore,
 )
 from {{slug}}.application.auth.exceptions import UserAlreadyExists
 from {{slug}}.config import SecurityConfig
 from {{slug}}.domain.user import User, UserId
 from {{slug}}.infrastructure.persistence.models import (
-    UserAuthTokenModel,
+    UserAuthSessionModel,
     UserModel,
 )
 from {{slug}}.infrastructure.persistence.transactions import SATransactionManager
@@ -56,7 +56,7 @@ class PasswordHashComparator(Protocol):
         """
 
 
-class AuthTokenGenerator(Protocol):
+class AuthSessionGenerator(Protocol):
     """Auth token generator."""
 
     @abstractmethod
@@ -77,7 +77,7 @@ class UserCredentialStoreImpl(UserCredentialStore):
     transaction: SATransactionManager
     password_hasher: PasswordHasher
     password_comparator: PasswordHashComparator
-    token_gen: AuthTokenGenerator
+    session_gen: AuthSessionGenerator
     sec_conf: SecurityConfig
 
     @override
@@ -108,11 +108,11 @@ class UserCredentialStoreImpl(UserCredentialStore):
         )
 
     @override
-    async def authorize(self, token: AuthToken) -> UserId | None:
-        expiry = datetime.now() - self.sec_conf.token_lifetime
-        query = select(UserAuthTokenModel).where(
-            UserAuthTokenModel.token == token,
-            UserAuthTokenModel.issued_at > expiry
+    async def authorize(self, token: AuthSession) -> UserId | None:
+        expiry = datetime.now() - self.sec_conf.session_lifetime
+        query = select(UserAuthSessionModel).where(
+            UserAuthSessionModel.token == token,
+            UserAuthSessionModel.issued_at > expiry
         )
         result = await self.transaction.session.execute(query)
         token_model = result.scalars().first()
@@ -121,9 +121,9 @@ class UserCredentialStoreImpl(UserCredentialStore):
         return cast(uuid.UUID, token_model.user_id)
 
     @override
-    async def generate_token(self, user_id: UserId) -> AuthToken:
-        token = self.token_gen.gen_token()
-        query = insert(UserAuthTokenModel).values(
+    async def generate_session(self, user_id: UserId) -> AuthSession:
+        token = self.session_gen.gen_token()
+        query = insert(UserAuthSessionModel).values(
             user_id=user_id,
             token=token
         )
@@ -131,8 +131,8 @@ class UserCredentialStoreImpl(UserCredentialStore):
         return token
 
     @override
-    async def revoke_tokens(self, user_id: UserId) -> None:
-        query = delete(UserAuthTokenModel).where(
-            UserAuthTokenModel.user_id == user_id
+    async def revoke_sessions(self, user_id: UserId) -> None:
+        query = delete(UserAuthSessionModel).where(
+            UserAuthSessionModel.user_id == user_id
         )
         await self.transaction.session.execute(query)

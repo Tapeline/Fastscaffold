@@ -52,10 +52,10 @@ DEFAULT_PG_CONF = GeneratedConfig(
 DEFAULT_SECURITY_CONF = GeneratedConfig(
     "Security",
     fields=dict(
-        token_lifetime="timedelta",
+        session_lifetime="timedelta",
     ),
     defaults=dict(
-        token_lifetime="timedelta(hours=48)"
+        session_lifetime="timedelta(hours=48)"
     )
 )
 DEFAULT_LOGGING_CONF = GeneratedConfig(
@@ -151,9 +151,9 @@ class LitestarAuthProviderGen(SimpleTemplateRender):
             GeneratedDIProvider(
                 import_line=(
                     f"from {slug}.bootstrap.di.auth "
-                    f"import AuthTokenDIProvider"
+                    f"import AuthSessionDIProvider"
                 ),
-                name="AuthTokenDIProvider"
+                name="AuthSessionDIProvider"
             )
         )
 

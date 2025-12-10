@@ -29,8 +29,8 @@ class RegisterSchema(LoginSchema):
     ...
 
 
-class TokenResponse(BaseModel):
-    token: str
+class SessionResponse(BaseModel):
+    session: str
 
 
 class RegisterResponse(BaseModel):
@@ -53,7 +53,7 @@ class AuthController(Controller):
             "Login and get auth token."
         ),
         responses={
-            200: success_spec("Login successful.", TokenResponse),
+            200: success_spec("Login successful.", SessionResponse),
             404: error_spec("Credentials are invalid."),
         },
         response_cookies=[
@@ -70,17 +70,17 @@ class AuthController(Controller):
             data: LoginSchema,
             interactor: FromDishka[LoginInteractor],
             security_config: FromDishka[SecurityConfig],
-    ) -> Response[TokenResponse]:
+    ) -> Response[SessionResponse]:
         """Login a user."""
-        token = await interactor(data.username, data.password)
+        session_id = await interactor(data.username, data.password)
         return Response(
-            TokenResponse(token=token),
+            SessionResponse(session=session_id),
             cookies=[
                 Cookie(
                     key="SESSION_ID",
-                    value=token,
+                    value=session_id,
                     expires=int(
-                        security_config.token_lifetime.total_seconds()
+                        security_config.session_lifetime.total_seconds()
                     ),
                     httponly=True,
                     secure=True

@@ -16,7 +16,6 @@ class GetProfileInteractor:
     user_gw: {{user_gw.name}}
     user_idp: UserIdProvider
 
-    @impl
     async def __call__(self) -> User:
         async with self.transaction:
             return await self.user_gw.get_by_id(

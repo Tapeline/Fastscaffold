@@ -5,7 +5,7 @@ from typing import Protocol, final, override, NewType
 from {{slug}}.application.auth.exceptions import UserNotAuthenticated
 {{user_import}}
 
-AuthToken = NewType("AuthToken", str)
+AuthSession = NewType("AuthSession", str)
 
 
 class UserIdProvider(Protocol):
@@ -59,7 +59,7 @@ class UserCredentialStore(Protocol):
         raise NotImplementedError
 
     @abstractmethod
-    async def authorize(self, token: AuthToken) -> {{user_class}}Id | None:
+    async def authorize(self, token: AuthSession) -> {{user_class}}Id | None:
         """
         Authorize some user by token.
 
@@ -74,23 +74,23 @@ class UserCredentialStore(Protocol):
         raise NotImplementedError
 
     @abstractmethod
-    async def generate_token(self, user_id: {{user_class}}Id) -> AuthToken:
+    async def generate_session(self, user_id: {{user_class}}Id) -> AuthSession:
         """
-        Generate new auth token for user.
+        Generate new auth session for user.
 
         Args:
             user_id: target user id
 
         Returns:
-            new token
+            new session id
 
         """
         raise NotImplementedError
 
     @abstractmethod
-    async def revoke_tokens(self, user_id: {{user_class}}Id) -> None:
+    async def revoke_sessions(self, user_id: {{user_class}}Id) -> None:
         """
-        Revoke all tokens from user.
+        Revoke all sessions from user.
 
         Args:
             user_id: target user
@@ -101,15 +101,15 @@ class UserCredentialStore(Protocol):
 
 @dataclass(slots=True, frozen=True)
 @final
-class TokenCredStoreIdProvider(UserIdProvider):
+class SessionCredStoreIdProvider(UserIdProvider):
     """Id provider impl. Needs to have token injected."""
 
     cred_store: UserCredentialStore
-    token: AuthToken
+    session: AuthSession
 
     @override
     async def get_user(self) -> {{user_class}}Id:
-        user_id = await self.cred_store.authorize(self.token)
+        user_id = await self.cred_store.authorize(self.session)
         if not user_id:
             raise UserNotAuthenticated
         return user_id

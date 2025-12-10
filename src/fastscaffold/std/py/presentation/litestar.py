@@ -11,6 +11,10 @@ class LitestarCommonsGen(SimpleManyTemplatesRender):
     Generates modules and functions to neatly deal with errors,
     OpenAPI and security definitions.
 
+    Examples:
+        ```python
+        LitestarCommonsGen()
+        ```
     """
 
     base_dir = ["presentation", "http"]
@@ -24,5 +28,26 @@ class LitestarCommonsGen(SimpleManyTemplatesRender):
 
 
 class LitestarCommonUserEndpointsGen(SimpleTemplateRender):
+    """
+    Generates common litestar user endpoints.
+
+    Requires:
+        BasicAppAuthGen
+        BasicAppAuthInteractorsGen
+        LitestarCommonsGen
+
+    These endpoints include:
+
+    - login
+    - logout
+    - register
+    - get profile
+
+    Examples:
+        ```python
+        LitestarCommonUserEndpointsGen()
+        ```
+    """
+
     location = ["presentation", "http", "controllers", "user.py"]
     template = "litestar/auth_controllers.py.template"

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import final
 
 from {{slug}}.application.auth.auth import (
-    AuthToken,
+    AuthSession,
     UserCredentialStore,
 )
 from {{slug}}.application.auth.exceptions import UserCredsNotFound
@@ -21,7 +21,7 @@ class LoginInteractor:
         self,
         username: str,
         password: str
-    ) -> AuthToken:
+    ) -> AuthSession:
         """Call."""
         async with self.transaction:
             user_id = await self.user_cred_store.login_user(

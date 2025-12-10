@@ -5,7 +5,7 @@ import argon2
 from argon2.exceptions import VerifyMismatchError
 
 from {{slug}}.infrastructure.persistence.auth import (
-    AuthTokenGenerator,
+    AuthSessionGenerator,
     PasswordHashComparator,
     PasswordHasher,
 )
@@ -13,7 +13,7 @@ from {{slug}}.infrastructure.persistence.auth import (
 _AUTH_TOKEN_BYTE_LEN: Final = 32
 
 
-class ArgonSecurity(PasswordHasher, PasswordHashComparator, AuthTokenGenerator):
+class ArgonSecurity(PasswordHasher, PasswordHashComparator, AuthSessionGenerator):
     """Impl."""
 
     @override

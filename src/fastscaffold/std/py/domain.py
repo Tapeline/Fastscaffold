@@ -10,7 +10,7 @@ from fastscaffold.std.configs import WebProjectConfig
 from fastscaffold.std.gen import src_in
 from fastscaffold.std.helpers import with_src
 
-from src.fastscaffold.std.gen import SimpleTemplateRender
+from fastscaffold.std.gen import SimpleTemplateRender
 
 
 @dataclass
@@ -26,6 +26,46 @@ class EntityStore:
 
 
 class EntityGen(SimpleTemplateRender):
+    """
+    Generate an entity in domain.
+
+    Args:
+        name: entity name
+        fields: dictionary of field names and type representations
+        with_id: whether to generate entity ID
+        make_dataclass: whether to generate as a dataclass
+        append: additional code to append in entity declaration
+        add_imports: additional imports for file. E.g. for connections
+            between entities.
+
+    Example:
+        ```python
+        EntityGen(
+            name="User",
+            fields=dict(
+                username="str",
+            ),
+            with_id=True
+        )
+        ```
+
+    Example:
+        ```python
+        EntityGen(
+            name="Note",
+            fields=dict(
+                name="str",
+                content="str",
+                author_id="UserId"
+            ),
+            with_id=True,
+            add_imports=[
+                "from myapp.domain.user import UserId"
+            ],
+        )
+        ```
+    """
+
     template = "domain/entity.py.template"
 
     def __init__(

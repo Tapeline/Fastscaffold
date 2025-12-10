@@ -1,0 +1,15 @@
+[importlinter]
+root_package = {{ slug }}
+
+[importlinter:contract:layers]
+name=Layered architecture
+type=layers
+containers =
+    {{ slug }}
+layers=
+    bootstrap
+    presentation
+    infrastructure
+    application
+    domain
+exhaustive = true

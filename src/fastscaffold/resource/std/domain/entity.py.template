@@ -9,13 +9,13 @@ from dataclasses import dataclass
 {{ import_ }}
 {% endfor %}
 {% if with_id -%}
-{{self.name}}Id = NewType("{{self.name}}Id", UUID)
+{{component.name}}Id = NewType("{{component.name}}Id", UUID)
 {%- endif %}
 
 
 {% if make_dataclass %}@dataclass(frozen=True, slots=True){% endif %}
 class {{name}}:
-    {% if with_id %}id: {{ self.name }}Id
+    {% if with_id %}id: {{ component.name }}Id
     {% endif %}
     {%- for field_name, field_type in fields.items() %}
     {{field_name}}: {{field_type}}

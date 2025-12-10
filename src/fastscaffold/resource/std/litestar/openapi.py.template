@@ -5,8 +5,8 @@ from litestar.openapi.spec import Components
 from {{slug}}.presentation.http.security import security_components
 
 app_openapi_config = OpenAPIConfig(
-    title="Syngrapha",
-    description="Syngrapha API",
+    title="{{web_project.name}}",
+    description="{{web_project.name}} API",
     version="1.0.0",
     render_plugins=[
         SwaggerRenderPlugin(),

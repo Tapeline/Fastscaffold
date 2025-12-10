@@ -17,6 +17,7 @@ class PyQAConfigsGen(SimpleManyTemplatesRender):
         "mypy.ini": "configs/mypy.ini.template",
         "pytest.ini": "configs/pytest.ini.template",
         "ruff.toml": "configs/ruff.toml.template",
+        ".importlinter": "configs/.importlinter.template",
     }
 
 

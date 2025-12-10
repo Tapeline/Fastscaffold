@@ -32,7 +32,7 @@ class {{entity.name}}Model(Base):
 
 {% if entity.name == "User" %}
 @final
-class UserAuthTokenModel(Base):
+class UserAuthSessionModel(Base):
     """Table for auth tokens."""
 
     __tablename__ = "tokens"

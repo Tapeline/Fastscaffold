@@ -3,7 +3,7 @@ from dishka import Provider, Scope, provide, WithParents
 from {{slug}}.application.identifier import UUIDGenerator
 from {{slug}}.infrastructure.identifier import UUIDGeneratorImpl
 from {{slug}}.infrastructure.persistence.auth import (
-    AuthTokenGenerator,
+    AuthSessionGenerator,
     PasswordHashComparator,
     PasswordHasher,
 )

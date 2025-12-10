@@ -8,7 +8,7 @@ from {{slug}}.application.auth.auth import (
 from {{slug}}.presentation.http.security import authenticate_user
 
 
-class AuthTokenDIProvider(Provider):
+class AuthSessionDIProvider(Provider):
     """Provider of id provider."""
 
     @provide(scope=Scope.REQUEST)
