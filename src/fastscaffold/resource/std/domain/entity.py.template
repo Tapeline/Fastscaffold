@@ -4,6 +4,7 @@ from uuid import UUID
 {%- endif %}
 {% if make_dataclass -%}
 from dataclasses import dataclass
+from {{ slug }}.data_commons import entity
 {%- endif %}
 {% for import_ in add_imports %}
 {{ import_ }}
@@ -13,7 +14,7 @@ from dataclasses import dataclass
 {%- endif %}
 
 
-{% if make_dataclass %}@dataclass(frozen=True, slots=True){% endif %}
+{% if make_dataclass %}@entity{% endif %}
 class {{name}}:
     {% if with_id %}id: {{ component.name }}Id
     {% endif %}

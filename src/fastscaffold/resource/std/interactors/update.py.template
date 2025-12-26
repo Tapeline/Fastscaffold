@@ -5,16 +5,18 @@ from typing import Final, override, final
 from {{slug}}.application.persistence.transactions import TransactionManager
 {{gw_import}}
 {{entity.import_line}}
+from {{ slug }}.data_commons import interactor, dto
 
 
-class Update{{entity.name}}DTO:
+@dto
+class {{ name }}DTO:
     """DTO for updating {{entity.name|camel_to_human}}."""{% for field, type in entity.fields.items()|no_id %}
     {{field}}: {{type}}{% endfor %}
 
 
-@dataclass
+@interactor
 @final
-class Update{{entity.name}}Interactor:
+class {{ name }}Interactor:
     """Update {{entity.name|camel_to_human}}."""
 
     {%if with_auth%}user_idp: UserIdProvider{%endif%}

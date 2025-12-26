@@ -6,11 +6,12 @@ from {{slug}}.application.persistence.transactions import TransactionManager
 from {{slug}}.application.pagination import PaginationParams
 {{gw_import}}
 {{entity.import_line}}
+from {{ slug }}.data_commons import interactor
 
 
-@dataclass
+@interactor
 @final
-class List{{entity.name}}Interactor:
+class {{ name }}Interactor:
     """List {{entity.name|camel_to_human}}."""
 
     {%if with_auth%}user_idp: UserIdProvider{%endif%}

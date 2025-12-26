@@ -21,10 +21,10 @@ class SATransactionManager(TransactionManager):
 
     @override
     async def __aexit__(
-            self,
-            exc_type: type[Exception],
-            exc_val: Exception,
-            exc_tb: Any
+        self,
+        exc_type: type[Exception],
+        exc_val: Exception,
+        exc_tb: Any
     ) -> None:
         if exc_val:
             await self.session.rollback()

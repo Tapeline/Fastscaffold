@@ -196,6 +196,23 @@ class AlgoDIProviderGen(SimpleTemplateRender):
         )
 
 
+class InteractorDIProviderGen(SimpleTemplateRender):
+    location = ["bootstrap", "di", "interactors.py"]
+    template = "bootstrap/interactors_di_provider.py.template"
+
+    def after_build(self, ctx: ScaffoldRunContext) -> None:
+        slug = ctx[WebProjectConfig].slug
+        _get_or_create_di_provider_store(ctx).providers.append(
+            GeneratedDIProvider(
+                import_line=(
+                    f"from {slug}.bootstrap.di.interactors "
+                    f"import InteractorsDIProvider"
+                ),
+                name="InteractorsDIProvider"
+            )
+        )
+
+
 class FuenteConfigLoaderGen(SimpleTemplateRender):
     location = ["bootstrap", "config.py"]
     template = "bootstrap/fuente_config_loader.py.template"

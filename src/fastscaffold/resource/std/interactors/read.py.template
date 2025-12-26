@@ -5,11 +5,12 @@ from typing import Final, override, final
 from {{slug}}.application.persistence.transactions import TransactionManager
 {{gw_import}}
 {{entity.import_line}}
+from {{ slug }}.data_commons import interactor
 
 
-@dataclass
+@interactor
 @final
-class Get{{entity.name}}Interactor:
+class {{ name }}Interactor:
     """Get {{entity.name|camel_to_human}}."""
 
     {%if with_auth%}user_idp: UserIdProvider{%endif%}

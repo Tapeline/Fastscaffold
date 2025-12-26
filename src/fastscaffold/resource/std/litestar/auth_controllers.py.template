@@ -66,10 +66,10 @@ class AuthController(Controller):
     )
     @inject
     async def login(
-            self, *,
-            data: LoginSchema,
-            interactor: FromDishka[LoginInteractor],
-            security_config: FromDishka[SecurityConfig],
+        self, *,
+        data: LoginSchema,
+        interactor: FromDishka[LoginInteractor],
+        security_config: FromDishka[SecurityConfig],
     ) -> Response[SessionResponse]:
         """Login a user."""
         session_id = await interactor(data.username, data.password)
@@ -100,9 +100,9 @@ class AuthController(Controller):
     )
     @inject
     async def register(
-            self, *,
-            data: RegisterSchema,
-            interactor: FromDishka[RegisterInteractor]
+        self, *,
+        data: RegisterSchema,
+        interactor: FromDishka[RegisterInteractor]
     ) -> RegisterResponse:
         user = await interactor(
             data.username,
@@ -126,8 +126,8 @@ class AuthController(Controller):
     )
     @inject
     async def get_profile(
-            self, *,
-            interactor: FromDishka[GetProfileInteractor]
+        self, *,
+        interactor: FromDishka[GetProfileInteractor]
     ) -> ProfileResponse:
         user = await interactor()
         return ProfileResponse(
@@ -148,7 +148,7 @@ class AuthController(Controller):
     )
     @inject
     async def revoke_tokens(
-            self, *,
-            interactor: FromDishka[RevokeTokensInteractor]
+        self, *,
+        interactor: FromDishka[RevokeTokensInteractor]
     ) -> None:
         await interactor()

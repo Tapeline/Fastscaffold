@@ -6,16 +6,18 @@ from {{slug}}.application.identifier import UUIDGenerator
 from {{slug}}.application.persistence.transactions import TransactionManager
 {{gw_import}}
 {{entity.import_line}}
+from {{ slug }}.data_commons import interactor, dto
 
 
-class Create{{entity.name}}DTO:
+@dto
+class {{ name }}DTO:
     """DTO for creating {{entity.name|camel_to_human}}."""{% for field, type in entity.fields.items()|no_id %}
     {{field}}: {{type}}{% endfor %}
 
 
-@dataclass
+@interactor
 @final
-class Create{{entity.name}}Interactor:
+class {{ name }}Interactor:
     """Create {{entity.name|camel_to_human}}."""
 
     {%if with_auth%}user_idp: UserIdProvider{%endif%}
