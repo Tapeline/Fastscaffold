@@ -8,3 +8,6 @@
     "fastscaffold.std.py.presentation.litestar.LitestarCommonUserEndpointsGen",
 ) }}
 
+{{ doc_component(
+    "fastscaffold.std.py.presentation.litestar.LitestarCommonCRUDGen",
+) }}
