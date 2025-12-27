@@ -1,16 +1,16 @@
 from dishka import Provider, Scope, provide_all
 
 {% for interactor in ctx["InteractorStore"].interactors -%}
-from {{ slug }}.{{ interactor.module_name }} import {{ interactor.name }}
+from {{ slug }}.{{ interactor.module_name }} import {{ interactor.name }}Interactor
 {% endfor %}
 
 
-class InteractorDIProvider(Provider):
+class InteractorsDIProvider(Provider):
     """Provides interactors."""
 
     interactors = provide_all(
         {% for interactor in ctx["InteractorStore"].interactors -%}
-        {{ interactor.name }},
+        {{ interactor.name }}Interactor,
         {% endfor %}
         scope=Scope.REQUEST
     )

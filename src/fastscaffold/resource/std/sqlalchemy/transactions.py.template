@@ -23,7 +23,7 @@ class SATransactionManager(TransactionManager):
     async def __aexit__(
         self,
         exc_type: type[Exception],
-        exc_val: Exception,
+        exc_val: Exception | None,
         exc_tb: Any
     ) -> None:
         if exc_val:

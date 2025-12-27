@@ -23,7 +23,7 @@ from {{slug}}.presentation.http.openapi import app_openapi_config
 
 
 def _create_config() -> Config:
-    return service_config_loader.load()
+    return service_config_loader.load()  # type: ignore[no-any-return]
 
 
 def _create_container(config: Config) -> AsyncContainer:
@@ -65,7 +65,7 @@ def create_app() -> Litestar:
         middleware=[
             {% if component.add_prometheus %}prometheus_config.middleware,{% endif %}
         ],
-        exception_handlers=handlers,  # type: ignore
+        exception_handlers=handlers,  # type: ignore[arg-type]
         openapi_config=app_openapi_config,
         cors_config=CORSConfig(allow_origins=["*"]),
         plugins=[

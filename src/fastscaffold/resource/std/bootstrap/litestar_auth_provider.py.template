@@ -14,7 +14,7 @@ class AuthSessionDIProvider(Provider):
     @provide(scope=Scope.REQUEST)
     def provide_identity(
         self,
-        request: Request,  # type: ignore
+        request: Request,  # type: ignore[type-arg]
         cred_store: UserCredentialStore,
     ) -> UserIdProvider:
         """Create identity provider from request headers or cookies."""

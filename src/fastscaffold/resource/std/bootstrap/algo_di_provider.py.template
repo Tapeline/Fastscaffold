@@ -13,7 +13,7 @@ from {{slug}}.infrastructure.security import ArgonSecurity
 class AlgorithmsDIProvider(Provider):
     """Provides different algorithms."""
 
-    scope = Scope.APP
+    scope = Scope.APP  # type: ignore[mutable-override]
 
     id_gen = provide(UUIDGeneratorImpl, provides=UUIDGenerator)
 

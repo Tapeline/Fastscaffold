@@ -85,7 +85,7 @@ class UserCredentialStoreImpl(UserCredentialStore):
         query = insert(UserModel).values(
             {% for field in user_entity %}{{field}}=user.{{field}},
             {% endfor %}
-            hashed_pass=self.password_hasher.hash(password),
+            hashed_password=self.password_hasher.hash(password),
         )
         try:
             await self.transaction.session.execute(query)
@@ -102,8 +102,8 @@ class UserCredentialStoreImpl(UserCredentialStore):
         if not user:
             return None
         return (
-            cast(uuid.UUID, user.id)
-            if self.password_comparator.compare(user.hashed_pass, password)
+            cast(UserId, user.id)
+            if self.password_comparator.compare(user.hashed_password, password)
             else None
         )
 
@@ -118,7 +118,7 @@ class UserCredentialStoreImpl(UserCredentialStore):
         token_model = result.scalars().first()
         if not token_model:
             return None
-        return cast(uuid.UUID, token_model.user_id)
+        return cast(UserId, token_model.user_id)
 
     @override
     async def generate_session(self, user_id: UserId) -> AuthSession:
@@ -128,7 +128,7 @@ class UserCredentialStoreImpl(UserCredentialStore):
             token=token
         )
         await self.transaction.session.execute(query)
-        return token
+        return AuthSession(token)
 
     @override
     async def revoke_sessions(self, user_id: UserId) -> None:

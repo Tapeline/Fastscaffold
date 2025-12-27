@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import override
 
 from sqlalchemy import select, update
@@ -9,12 +10,13 @@ from {{slug}}.infrastructure.persistence.models import {{entity.name}}Model
 from {{slug}}.infrastructure.persistence.transactions import SATransactionManager
 
 
+@dataclass
 class Sql{{entity.name}}Gateway({{entity.name}}Gateway):
     transaction: SATransactionManager
     {% if opt.get_by_id %}
     @override
     async def get_by_id(self, uid: {{entity.name}}Id) -> {{entity.name}}:
-        query = select({{entity.name}}Model).where({{entity.name}}Model.uuid == uid)
+        query = select({{entity.name}}Model).where({{entity.name}}Model.id == uid)
         result = await self.transaction.execute(query)
         try:
             return _convert_to_{{entity.name|camel_to_snake}}(result.scalars().one())
@@ -25,17 +27,19 @@ class Sql{{entity.name}}Gateway({{entity.name}}Gateway):
     @override
     async def save(self, entity: {{entity.name}}) -> None:
         model = _convert_to_{{entity.name|camel_to_snake}}_model(entity)
-        self.transaction.add(model)
+        await self.transaction.session.merge(model)
     {% endif %}
 
 
 def _convert_to_{{entity.name|camel_to_snake}}(model: {{entity.name}}Model) -> {{entity.name}}:
-    return {{entity.name}}({% for field_name in entity.fields.keys() %}
+    return {{entity.name}}(
+        id={{ entity.name }}Id(model.id),{% for field_name in entity.fields.keys() %}
         {{field_name}}=model.{{field_name}},{% endfor %}
     )
 
 
 def _convert_to_{{entity.name|camel_to_snake}}_model({{entity.name|camel_to_snake}}: {{entity.name}}) -> {{entity.name}}Model:
-    return {{entity.name}}Model({% for field_name in entity.fields.keys() %}
+    return {{entity.name}}Model(
+        id={{entity.name|camel_to_snake}}.id,{% for field_name in entity.fields.keys() %}
         {{field_name}}={{entity.name|camel_to_snake}}.{{field_name}},{% endfor %}
     )

@@ -84,6 +84,7 @@ class _BaseInteractorGen(SimpleTemplateRender):
 
 class CreateInteractorGen(_BaseInteractorGen):
     interactor_filename = "create.py"
+    interactor_name_template = "Create{0}"
     template = "interactors/create.py.template"
 
 

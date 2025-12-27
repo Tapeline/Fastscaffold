@@ -17,4 +17,4 @@ class RevokeTokensInteractor:
         """Call."""
         user_id = await self.user_idp.get_user()
         async with self.transaction:
-            await self.cred_store.revoke_tokens(user_id)
+            await self.cred_store.revoke_sessions(user_id)

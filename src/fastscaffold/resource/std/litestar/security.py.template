@@ -7,6 +7,7 @@ from {{slug}}.application.auth.auth import (
     SessionCredStoreIdProvider,
     UserCredentialStore,
     UserIdProvider,
+    AuthSession,
 )
 
 security_components: Final = {
@@ -41,5 +42,5 @@ def authenticate_user(
     session_id = request.cookies.get("SESSION_ID")
     return SessionCredStoreIdProvider(
         cred_store=cred_store,
-        token=auth_header or session_id or ""
+        session=AuthSession(auth_header or session_id or "")
     )

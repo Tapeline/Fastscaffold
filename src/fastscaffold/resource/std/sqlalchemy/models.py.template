@@ -24,10 +24,17 @@ class {{entity.name}}Model(Base):
     {% for field, type in entity.fields.items()|no_id %}
     {% if type.endswith("Id") %}{{field}}: Mapped[str] = mapped_column(
         "{{field}}",
-        ForeignKey("{{type.removesuffix("Id")|camel_to_snake}}s.uuid")
+        ForeignKey("{{type.removesuffix("Id")|camel_to_snake}}s.id")
     )
     {{field.removesuffix("_id")}}: Mapped[{{type.removesuffix("Id")}}Model] = relationship()
-    {%else%}{{field}}: Mapped[{{type}}]{% endif %}{% endfor %}
+    {% elif entity.name == "User" and field == "username" -%}
+    {{ field }}: Mapped[str] = mapped_column(
+        "{{ field }}",
+        String,
+        unique=True,
+    )
+    {%else-%}
+    {{field}}: Mapped[{{type}}]{% endif %}{% endfor %}
     {% if entity.name == "User" %}hashed_password: Mapped[str]{% endif %}
 
 {% if entity.name == "User" %}
@@ -39,7 +46,7 @@ class UserAuthSessionModel(Base):
 
     user_id: Mapped[str] = mapped_column(
         "user_id",
-        ForeignKey("users.uuid")
+        ForeignKey("users.id")
     )
     user: Mapped[UserModel] = relationship()
     token: Mapped[str] = mapped_column(

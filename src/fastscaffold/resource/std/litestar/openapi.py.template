@@ -13,6 +13,6 @@ app_openapi_config = OpenAPIConfig(
     ],
     path="/docs",
     components=Components(
-        security_schemes=security_components  # type: ignore
+        security_schemes=security_components  # type: ignore[arg-type]
     )
 )

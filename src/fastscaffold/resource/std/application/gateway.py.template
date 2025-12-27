@@ -24,7 +24,7 @@ class {{ entity.name }}Gateway(Protocol):
 {% endif %}
 {% if include.add_delete_by_id %}
     @abstractmethod
-    async def delete_by_id(self, uid: {{ entity.name }}Id) -> {{ entity.name }}:
+    async def delete_by_id(self, uid: {{ entity.name }}Id) -> None:
         """Delete by id."""
         raise NotImplementedError
 {% endif %}
@@ -36,7 +36,11 @@ class {{ entity.name }}Gateway(Protocol):
 {% endif %}
 {% for method in include.get("add_get_paginated_filtered", []) %}
     @abstractmethod
-    async def {{ method.name }}(self, {{ method.args }}) -> Sequence[{{ entity.name }}]:
+    async def {{ method.name }}(
+        self,
+        {{ method.args }},
+        paginate: PaginationParams
+    ) -> Sequence[{{ entity.name }}]:
         """Get filtered and paginated."""
         raise NotImplementedError
 {% endfor %}

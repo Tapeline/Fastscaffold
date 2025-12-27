@@ -129,6 +129,7 @@ def test():
                 name="ListAllSomeEntities",
                 with_auth=False
             ),
+            CreateInteractorGen("SomeUserEntity"),
             ReadInteractorGen("SomeUserEntity"),
             UpdateInteractorGen("SomeUserEntity"),
             DeleteInteractorGen("SomeUserEntity"),
