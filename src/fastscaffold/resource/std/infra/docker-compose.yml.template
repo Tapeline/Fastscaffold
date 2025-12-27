@@ -1,0 +1,40 @@
+version: "3.7"
+services:
+  db:
+    image: postgres:17
+    hostname: db
+    environment:
+      POSTGRES_DB: {{ slug }}_db
+      POSTGRES_USER: pguser
+      POSTGRES_PASSWORD: pgpass
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"
+    networks:
+      - {{ slug }}_main_net
+    volumes:
+      - pgdata:/var/lib/postgresql/
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U pguser -d {{ slug }}_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    networks:
+      - {{ slug }}_main_net
+    environment:
+      {{ slug | upper }}_POSTGRES__HOST: db
+
+volumes:
+  pgdata:
+
+networks:
+  {{ slug }}_main_net:
+    driver: bridge

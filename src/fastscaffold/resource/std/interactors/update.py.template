@@ -11,7 +11,7 @@ from {{ slug }}.data_commons import interactor, dto
 @dto
 class {{ name }}DTO:
     """DTO for updating {{entity.name|camel_to_human}}."""{% for field, type in entity.fields.items()|no_id %}
-    {{field}}: {{type}} | None{% endfor %}
+    {{field}}: {{type}} | None = None{% endfor %}
 
 
 @interactor

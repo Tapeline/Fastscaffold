@@ -20,6 +20,9 @@ from {{slug}}.bootstrap.config import service_config_loader
 from {{slug}}.bootstrap.logging import get_structlog_plugin_def
 from {{slug}}.presentation.http.errors import handlers
 from {{slug}}.presentation.http.openapi import app_openapi_config
+{% for controller in ctx["LitestarControllerStore"].controllers -%}
+from {{ slug }}.{{ controller.module_name }} import {{ controller.name }}
+{% endfor %}
 
 
 def _create_config() -> Config:
@@ -60,6 +63,9 @@ def create_app() -> Litestar:
         debug=True,
         route_handlers=[
             # TODO fill this
+            {% for controller in ctx["LitestarControllerStore"].controllers -%}
+            {{ controller.name }},
+            {% endfor %}
             {% if component.add_prometheus %}PrometheusController,{% endif %}
         ],
         middleware=[
@@ -69,7 +75,7 @@ def create_app() -> Litestar:
         openapi_config=app_openapi_config,
         cors_config=CORSConfig(allow_origins=["*"]),
         plugins=[
-            get_structlog_plugin_def({% if "Logging" in ctx["ConfigStore"].name_mapped %}config.logging.use_json{% endif %}),
+            get_structlog_plugin_def({% if "Logging" in ctx["ConfigStore"].name_mapped %}use_json=config.logging.use_json{% endif %}),
         ],
     )
     litestar_setup_dishka(container, litestar_app)

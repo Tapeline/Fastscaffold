@@ -1,0 +1,217 @@
+from uuid import UUID
+
+from adaptix.conversion import coercer, get_converter
+from dishka import FromDishka
+from dishka.integrations.litestar import inject
+from litestar import Controller, delete, get, patch, post
+from msgspec import Struct
+
+
+{% if "c" in component.opts %}
+from {{ slug }}.application.interactors.{{ component.entity | camel_to_snake }}.create import (
+    Create{{ component.entity }}DTO,
+    Create{{ component.entity }}Interactor,
+)
+{% endif %}
+{% if "d" in component.opts %}
+from {{ slug }}.application.interactors.{{ component.entity | camel_to_snake }}.delete import (
+    Delete{{ component.entity }}Interactor,
+)
+{% endif %}
+{% if "l" in component.opts %}
+from {{ slug }}.application.interactors.{{ component.entity | camel_to_snake }}.list import (
+    List{{ component.entity | plural }}Interactor,
+)
+{% endif %}
+{% if "r" in component.opts %}
+from {{ slug }}.application.interactors.{{ component.entity | camel_to_snake }}.read import (
+    Read{{ component.entity }}Interactor,
+)
+{% endif %}
+{% if "u" in component.opts %}
+from {{ slug }}.application.interactors.{{ component.entity | camel_to_snake }}.update import (
+    Update{{ component.entity }}DTO,
+    Update{{ component.entity }}Interactor,
+)
+{% endif %}
+from {{ slug }}.application.pagination import PaginationParams
+from {{ slug }}.domain.{{ component.entity | camel_to_snake }} import {{ component.entity }}, {{ component.entity }}Id
+from {{ slug }}.presentation.http.framework.openapi import (
+    error_spec,
+    success_spec,
+)
+from {{ slug }}.presentation.http.security import security_defs
+
+
+{% if "c" in component.opts %}
+class Create{{ component.entity }}Request(Struct):
+    """Create {{ component.entity | camel_to_human }}."""
+    {% for field, type in ctx["EntityStore"].entities[component.entity].fields.items() %}
+    {% if field != "id" %}
+    {{ field }}: {{ type }}
+    {% endif %}
+    {% endfor %}
+{% endif %}
+
+
+{% if "u" in component.opts %}
+class Update{{ component.entity }}Request(Struct):
+    """Update {{ component.entity | camel_to_human }} (partially)."""
+    {% for field, type in ctx["EntityStore"].entities[component.entity].fields.items() %}
+    {% if field != "id" %}
+    {{ field }}: {{ type }} | None = None
+    {% endif %}
+    {% endfor %}
+{% endif %}
+
+
+class {{ component.entity }}Response(Struct):
+    """Read {{ component.entity | camel_to_human }}."""
+    {% for field, type in ctx["EntityStore"].entities[component.entity].fields.items() %}
+    {% if field != "id" %}
+    {{ field }}: {{ type }}
+    {% else %}
+    {{ field }}: UUID
+    {% endif %}
+    {% endfor %}
+
+
+{{ component.entity | camel_to_snake }}_converter = get_converter(
+    {{ component.entity }}, {{ component.entity }}Response,
+    recipe=[
+        coercer({{ component.entity }}Id, UUID, lambda x: x),
+    ],
+)
+{% if "c" in component.opts %}
+create_{{ component.entity | camel_to_snake }}_converter = get_converter(
+    Create{{ component.entity }}Request, Create{{ component.entity }}DTO,
+)
+{% endif %}
+{% if "u" in component.opts %}
+update_{{ component.entity | camel_to_snake }}_converter = get_converter(
+    Update{{ component.entity }}Request, Update{{ component.entity }}DTO,
+)
+{% endif %}
+
+
+class {{ component.entity }}Controller(Controller):
+    path = "/{{ component.entity | camel_to_snake | snake_to_kebab | plural }}"
+    tags = ("{{ component.entity | camel_to_human }}",)
+
+    {% if "l" in component.opts %}
+    @get(
+        path="",
+        responses={
+            200: success_spec("Successful.", list[{{ component.entity }}Response]),
+            401: error_spec("Not authorized."),
+        },
+        {% if ctx["InteractorStore"].by_name("List" + plural(component.entity) + "Interactor").with_auth -%}
+        security=security_defs,
+        {%- endif %}
+    )
+    @inject
+    async def list_{{ component.entity | camel_to_snake | plural }}(
+        self, *,
+        page: int = 0, page_size: int = 10,
+        interactor: FromDishka[List{{ component.entity | plural }}Interactor],
+    ) -> list[{{ component.entity }}Response]:
+        """List {{ component.entity | camel_to_human | plural }}."""
+        {{ component.entity | camel_to_snake | plural }} = await interactor(PaginationParams(page, page_size))
+        return list(map({{ component.entity | camel_to_snake }}_converter, {{ component.entity | camel_to_snake | plural }}))
+    {% endif %}
+
+    {% if "c" in component.opts %}
+    @post(
+        path="",
+        responses={
+            201: success_spec("Creation successful.", {{ component.entity }}Response),
+            401: error_spec("Not authorized."),
+        },
+        {% if ctx["InteractorStore"].by_name("Create" + component.entity + "Interactor").with_auth -%}
+        security=security_defs,
+        {%- endif %}
+    )
+    @inject
+    async def create(
+        self, *,
+        data: Create{{ component.entity }}Request,
+        interactor: FromDishka[Create{{ component.entity }}Interactor],
+    ) -> {{ component.entity }}Response:
+        """Create {{ component.entity | camel_to_human }}."""
+        {{ component.entity | camel_to_snake }} = await interactor(create_{{ component.entity | camel_to_snake }}_converter(data))
+        return {{ component.entity | camel_to_snake }}_converter({{ component.entity | camel_to_snake }})
+    {% endif %}
+
+    {% if "r" in component.opts %}
+    @get(
+        path="/{uid:uuid}",
+        responses={
+            200: success_spec("Success.", {{ component.entity }}Response),
+            404: error_spec("Not found."),
+            401: error_spec("Not authenticated."),
+        },
+        {% if ctx["InteractorStore"].by_name("Read" + component.entity + "Interactor").with_auth -%}
+        security=security_defs,
+        {%- endif %}
+    )
+    @inject
+    async def read(
+        self, *,
+        uid: UUID,
+        interactor: FromDishka[Read{{ component.entity }}Interactor],
+    ) -> {{ component.entity }}Response:
+        """Read {{ component.entity | camel_to_human }}."""
+        {{ component.entity | camel_to_snake }} = await interactor({{ component.entity }}Id(uid))
+        return {{ component.entity | camel_to_snake }}_converter({{ component.entity | camel_to_snake }})
+    {% endif %}
+
+    {% if "u" in component.opts %}
+    @patch(
+        path="/{uid:uuid}",
+        responses={
+            200: success_spec("Update successful.", {{ component.entity }}Response),
+            403: error_spec("Forbidden."),
+            404: error_spec("Not found."),
+            401: error_spec("Not authorized."),
+        },
+        {% if ctx["InteractorStore"].by_name("Update" + component.entity + "Interactor").with_auth -%}
+        security=security_defs,
+        {%- endif %}
+    )
+    @inject
+    async def update(
+        self, *,
+        uid: UUID,
+        data: Update{{ component.entity }}Request,
+        interactor: FromDishka[Update{{ component.entity }}Interactor],
+    ) -> {{ component.entity }}Response:
+        """Update {{ component.entity | camel_to_human }} (partially)."""
+        {{ component.entity | camel_to_snake }} = await interactor(
+            {{ component.entity }}Id(uid),
+            update_{{ component.entity | camel_to_snake }}_converter(data),
+        )
+        return {{ component.entity | camel_to_snake }}_converter({{ component.entity | camel_to_snake }})
+    {% endif %}
+
+    {% if "d" in component.opts %}
+    @delete(
+        path="/{uid:uuid}",
+        responses={
+            204: success_spec("Success.", None),
+            403: error_spec("Forbidden."),
+            404: error_spec("Not found."),
+            401: error_spec("Not authenticated."),
+        },
+        {% if ctx["InteractorStore"].by_name("Delete" + component.entity + "Interactor").with_auth -%}
+        security=security_defs,
+        {%- endif %}
+    )
+    @inject
+    async def delete(
+        self, *,
+        uid: UUID,
+        interactor: FromDishka[Delete{{ component.entity }}Interactor],
+    ) -> None:
+        """Delete {{ component.entity | camel_to_human }}."""
+        await interactor({{ component.entity }}Id(uid))
+    {% endif %}

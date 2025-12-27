@@ -5,7 +5,7 @@ from typing import Any, ClassVar
 from fastscaffold.core.component import ScaffoldComponent
 from fastscaffold.core.context import ScaffoldRunContext
 from fastscaffold.std.configs import WebProjectConfig
-from fastscaffold.std.helpers import with_src
+from fastscaffold.std.helpers import plural, with_src
 from fastscaffold.std.jinja import Jinja
 
 
@@ -72,6 +72,7 @@ class SimpleTemplateRender(ScaffoldComponent):
             slug=ctx[WebProjectConfig].slug,
             ctx=ctx,
             component=self,
+            plural=plural
         )
 
     def before_build(self, ctx: ScaffoldRunContext) -> None:
@@ -110,6 +111,7 @@ class SimpleManyTemplatesRender(ScaffoldComponent):
             slug=ctx[WebProjectConfig].slug,
             ctx=ctx,
             component=self,
+            plural=plural,
         )
 
     def before_build(self, ctx: ScaffoldRunContext) -> None:

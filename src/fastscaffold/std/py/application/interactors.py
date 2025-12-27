@@ -8,7 +8,7 @@ from fastscaffold.core.component import ScaffoldComponent
 from fastscaffold.core.context import ScaffoldRunContext
 from fastscaffold.std.configs import WebProjectConfig
 from fastscaffold.std.gen import SimpleTemplateRender, src_in
-from fastscaffold.std.helpers import with_src
+from fastscaffold.std.helpers import plural, with_src
 from fastscaffold.std.jinja import Jinja
 from fastscaffold.std.py.application.basic_user import AuthConfig
 from fastscaffold.std.py.application.persistence import GatewayStore
@@ -19,11 +19,20 @@ from fastscaffold.std.py.domain import EntityStore
 class GeneratedInteractor:
     name: str
     module_name: str
+    with_auth: bool
 
 
 @dataclass
 class InteractorStore:
     interactors: list[GeneratedInteractor]
+
+    def by_name(self, name: str) -> GeneratedInteractor | None:
+        intr = next((
+            interactor
+            for interactor in self.interactors
+            if interactor.name == name.removesuffix("Interactor")
+        ), None)
+        return intr
 
 
 class _BaseInteractorGen(SimpleTemplateRender):
@@ -34,7 +43,7 @@ class _BaseInteractorGen(SimpleTemplateRender):
         AuthConfig,
     ]
     interactor_filename: str = ""
-    interactor_name_template: str = ""
+    interactor_name_template = lambda x: x
 
     def __init__(
         self,
@@ -46,7 +55,7 @@ class _BaseInteractorGen(SimpleTemplateRender):
         self.entity_name = entity_name
         self.module_name = camelsnake.camel_to_snake(entity_name)
         self.with_auth = with_auth
-        self.name = name or self.interactor_name_template.format(entity_name)
+        self.name = name or self.__class__.interactor_name_template(entity_name)
 
     def get_location(self, ctx: ScaffoldRunContext) -> list[str]:
         return [
@@ -77,38 +86,39 @@ class _BaseInteractorGen(SimpleTemplateRender):
                     f"application."
                     f"interactors."
                     f"{self.module_name}."
-                    f"{self.interactor_filename.removesuffix('.py')}"
+                    f"{self.interactor_filename.removesuffix('.py')}",
+                    self.with_auth,
                 )
             )
 
 
 class CreateInteractorGen(_BaseInteractorGen):
     interactor_filename = "create.py"
-    interactor_name_template = "Create{0}"
+    interactor_name_template = lambda x: f"Create{x}"
     template = "interactors/create.py.template"
 
 
 class ReadInteractorGen(_BaseInteractorGen):
     interactor_filename = "read.py"
-    interactor_name_template = "Read{0}"
+    interactor_name_template = lambda x: f"Read{x}"
     template = "interactors/read.py.template"
 
 
 class UpdateInteractorGen(_BaseInteractorGen):
     interactor_filename = "update.py"
-    interactor_name_template = "Update{0}"
+    interactor_name_template = lambda x: f"Update{x}"
     template = "interactors/update.py.template"
 
 
 class DeleteInteractorGen(_BaseInteractorGen):
     interactor_filename = "delete.py"
-    interactor_name_template = "Delete{0}"
+    interactor_name_template = lambda x: f"Delete{x}"
     template = "interactors/delete.py.template"
 
 
 class ListInteractorGen(_BaseInteractorGen):
     interactor_filename = "list.py"
-    interactor_name_template = "List{0}"
+    interactor_name_template = lambda x: f"List{plural(x)}"
     template = "interactors/list.py.template"
 
     def __init__(self, *args, gw_list_method: str, **kwargs) -> None:

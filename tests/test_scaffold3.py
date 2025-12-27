@@ -41,6 +41,7 @@ from fastscaffold.std.py.configs import (
     PyprojectGen,
 )
 from fastscaffold.std.py.domain import EntityGen
+from fastscaffold.std.py.infra import DockerGen
 from fastscaffold.std.py.infrastructure.persistence import (
     AlembicGen,
     SqlalchemyModelsGen,
@@ -49,7 +50,7 @@ from fastscaffold.std.py.infrastructure.persistence import (
     SqlalchemyTransactionManagerGen, UUIDGeneratorImplGen,
 )
 from fastscaffold.std.py.presentation.litestar import (
-    LitestarCommonUserEndpointsGen,
+    LitestarCommonCRUDGen, LitestarCommonUserEndpointsGen,
     LitestarCommonsGen,
 )
 from fastscaffold.std.py.tests import SuperSimpleTestsTemplateGen
@@ -161,6 +162,8 @@ def test():
             ArgonSecurityGen(),
             LitestarCommonsGen(),
             LitestarCommonUserEndpointsGen(),
+            LitestarCommonCRUDGen("crudl", "SomeEntity"),
+            LitestarCommonCRUDGen("crudl", "SomeUserEntity"),
             SqlalchemySessionGen(),
             ConfigGen(
                 DEFAULT_PG_CONF,
@@ -179,6 +182,7 @@ def test():
             PyQAConfigsGen(),
             SuperSimpleTestsTemplateGen(),
             JustfileGen(),
+            DockerGen(),
         ]
 
     executor = ScaffoldExecutor()

@@ -12,9 +12,9 @@ class Base(DeclarativeBase):
 
 {% for entity in entities %}@final
 class {{entity.name}}Model(Base):
-    """Table for {{entity.name|camel_to_human}}s."""
+    """Table for {{entity.name|camel_to_human|plural}}."""
 
-    __tablename__ = "{{entity.name|camel_to_snake}}s"
+    __tablename__ = "{{entity.name|camel_to_snake|plural}}"
 
     id: Mapped[str] = mapped_column(
         "id",
@@ -24,7 +24,7 @@ class {{entity.name}}Model(Base):
     {% for field, type in entity.fields.items()|no_id %}
     {% if type.endswith("Id") %}{{field}}: Mapped[str] = mapped_column(
         "{{field}}",
-        ForeignKey("{{type.removesuffix("Id")|camel_to_snake}}s.id")
+        ForeignKey("{{type.removesuffix("Id")|camel_to_snake|plural}}.id")
     )
     {{field.removesuffix("_id")}}: Mapped[{{type.removesuffix("Id")}}Model] = relationship()
     {% elif entity.name == "User" and field == "username" -%}

@@ -15,7 +15,7 @@ class {{ entity.name }}NotFound(Exception):
 {% endif %}
 
 class {{ entity.name }}Gateway(Protocol):
-    """Access to {{ entity.name|camel_to_snake|replace("_", " ") }}s."""
+    """Access to {{ entity.name|camel_to_human|plural }}."""
 {% if include.add_get_by_id %}
     @abstractmethod
     async def get_by_id(self, uid: {{ entity.name }}Id) -> {{ entity.name }}:
@@ -38,7 +38,7 @@ class {{ entity.name }}Gateway(Protocol):
     @abstractmethod
     async def {{ method.name }}(
         self,
-        {{ method.args }},
+        {% if method.args %}{{ method.args }},{% endif %}
         paginate: PaginationParams
     ) -> Sequence[{{ entity.name }}]:
         """Get filtered and paginated."""

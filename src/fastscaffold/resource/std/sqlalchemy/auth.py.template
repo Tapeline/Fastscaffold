@@ -83,7 +83,8 @@ class UserCredentialStoreImpl(UserCredentialStore):
     @override
     async def register_user(self, user: User, password: str) -> None:
         query = insert(UserModel).values(
-            {% for field in user_entity %}{{field}}=user.{{field}},
+            id=user.id,
+            {% for field in ctx["EntityStore"].entities["User"].fields %}{{field}}=user.{{field}},
             {% endfor %}
             hashed_password=self.password_hasher.hash(password),
         )
