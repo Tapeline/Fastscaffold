@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Any
 
 from camelsnake import camel_to_snake
@@ -21,6 +22,7 @@ class AlembicGen(SimpleManyTemplatesRender):
         "migrations/env.py": "alembic/env.py.template",
         "migrations/README": "alembic/README",
         "migrations/script.py.mako": "alembic/script.py.mako",
+        "../../../../alembic.ini": "alembic/alembic.ini.template",
     }
 
     def get_jinja_vars(self, ctx: ScaffoldRunContext) -> dict[str, Any]:

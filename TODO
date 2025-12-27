@@ -1,11 +1,3 @@
 recursive __init__.py addition
-UserDIProvider
 SARepoDIProvider
-alembic config gen
-V dockerfile and docker compose
 rename gateways to repos
-V litestar controllers
-V append litestar controllers to app.py
-V fix register user impl in cred store (field mapping)
-asgi monitor
-V properly pluralise

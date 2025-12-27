@@ -36,6 +36,39 @@ class InteractorStore:
 
 
 class _BaseInteractorGen(SimpleTemplateRender):
+    """
+    Generate a common entity action interactor.
+
+    Possible actions are:
+
+    - Create
+    - Read
+    - Update
+    - Delete
+    - List
+
+    They are all represented by classes with according prefix.
+
+    Args:
+        entity_name: target entity name
+        with_auth: whether to require user logged in
+        name: customise interactor name (instead of using generated one)
+
+    Examples:
+        ```python
+        ReadInteractorGen("Post", with_auth=False)
+        ```
+
+        ```python
+        CreateInteractorGen(
+            entity_name="Comment",
+            with_auth=True,
+            name="CommentPostInteractor"
+        )
+        ```
+
+    """
+
     requires_context = [
         *SimpleTemplateRender.requires_context,
         EntityStore,
@@ -93,30 +126,82 @@ class _BaseInteractorGen(SimpleTemplateRender):
 
 
 class CreateInteractorGen(_BaseInteractorGen):
+    """
+    Generate a common entity creation interactor.
+
+    See Also: `_BaseInteractorGen`
+
+    """
+
     interactor_filename = "create.py"
     interactor_name_template = lambda x: f"Create{x}"
     template = "interactors/create.py.template"
 
 
 class ReadInteractorGen(_BaseInteractorGen):
+    """
+    Generate a common entity reading interactor.
+
+    See Also: `_BaseInteractorGen`
+
+    """
+
     interactor_filename = "read.py"
     interactor_name_template = lambda x: f"Read{x}"
     template = "interactors/read.py.template"
 
 
 class UpdateInteractorGen(_BaseInteractorGen):
+    """
+    Generate a common entity update interactor.
+
+    See Also: `_BaseInteractorGen`
+
+    """
+
     interactor_filename = "update.py"
     interactor_name_template = lambda x: f"Update{x}"
     template = "interactors/update.py.template"
 
 
 class DeleteInteractorGen(_BaseInteractorGen):
+    """
+    Generate a common entity deletion interactor.
+
+    See Also: `_BaseInteractorGen`
+
+    """
+
     interactor_filename = "delete.py"
     interactor_name_template = lambda x: f"Delete{x}"
     template = "interactors/delete.py.template"
 
 
 class ListInteractorGen(_BaseInteractorGen):
+    """
+    Generate a common entity listing interactor.
+
+    Args:
+        entity_name: target entity name
+        with_auth: whether to require user logged in
+        name: customise interactor name (instead of using generated one)
+        gw_list_method: method to use to get entity list in associated
+            gateway
+
+    Examples:
+        ```python
+        ListInteractorGen(
+            "Post",
+            with_auth=False,
+            name="ListPostsOfUserInteractor",
+            gw_list_name="list_of_user"
+        )
+        ```
+
+    See Also: `_BaseInteractorGen`
+
+    """
+
     interactor_filename = "list.py"
     interactor_name_template = lambda x: f"List{plural(x)}"
     template = "interactors/list.py.template"

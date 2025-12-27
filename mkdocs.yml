@@ -6,10 +6,30 @@ nav:
       - Install: getting_started/install.md
       - Create first app: getting_started/create_first_app.md
   - Components:
+      - Commons:
+          - Data commons: components/commons/data.md
       - Domain:
           - Entity: components/domain/entity.md
+      - Application:
+          - Auth & user: components/application/auth.md
+          - Common interactors: components/application/interactors.md
+          - Persistence: components/application/storage.md
+      - Infrastructure:
+          - Persistence: components/infrastructure/persistence.md
+          - Security algorithms: components/infrastructure/security.md
       - Presentation:
           - Litestar: components/presentation/litestar.md
+      - Bootstrap:
+          - Config: a
+          - Litestar: a
+          - DI: a
+      - Packaging:
+          - Docker: a
+          - Python project: a
+      - Tools:
+          - QA configs: a
+      - Tests:
+          - Pytest: a
   - Contributing: contributing.md
 
 theme:

@@ -14,6 +14,25 @@ class AuthConfig:
 
 
 class BasicAppAuthGen(SimpleManyTemplatesRender):
+    """
+    Generates default user auth logic at application layer.
+
+    It includes:
+
+    - IdP
+    - Auth and user exceptions
+    - Auth interfaces
+
+    Args:
+        user_entity_name: name of user entity (deprecated, marked for removal)
+
+    Examples:
+        ```python
+        BasicAppAuthGen()
+        ```
+
+    """
+
     requires_context = [
         *SimpleManyTemplatesRender.requires_context,
         EntityStore,
@@ -24,7 +43,7 @@ class BasicAppAuthGen(SimpleManyTemplatesRender):
         "exceptions.py": "auth/exceptions.py.template"
     }
 
-    def __init__(self, user_entity_name: str):
+    def __init__(self, user_entity_name: str = "User"):
         self.user_entity_name = user_entity_name
 
     def get_jinja_vars(self, ctx: ScaffoldRunContext) -> dict[str, Any]:
@@ -45,6 +64,26 @@ class BasicAppAuthGen(SimpleManyTemplatesRender):
 
 
 class BasicAppAuthInteractorsGen(SimpleManyTemplatesRender):
+    """
+    Generates default user auth actions at application layer.
+
+    It includes:
+
+    - logging in
+    - logging out
+    - getting profile
+    - registering
+
+    Args:
+        entity_name: name of user entity (deprecated, marked for removal)
+
+    Examples:
+        ```python
+        BasicAppAuthInteractorsGen()
+        ```
+
+    """
+
     requires_context = [
         *SimpleManyTemplatesRender.requires_context,
         EntityStore, GatewayStore,
@@ -57,7 +96,7 @@ class BasicAppAuthInteractorsGen(SimpleManyTemplatesRender):
         "register.py": "interactors/auth/register.py.template",
     }
 
-    def __init__(self, entity_name: str) -> None:
+    def __init__(self, entity_name: str = "User") -> None:
         self.entity_name = entity_name
 
     def get_jinja_vars(self, ctx: ScaffoldRunContext) -> dict[str, Any]:

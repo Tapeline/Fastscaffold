@@ -9,7 +9,7 @@ from fastscaffold.std.configs import WebProjectConfig
 from fastscaffold.std.gen import SimpleTemplateRender, import_from
 from fastscaffold.std.py.domain import EntityStore
 
-from src.fastscaffold.misc.merger import merge_all
+from fastscaffold.misc.merger import merge_all
 
 
 @dataclass
