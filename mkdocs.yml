@@ -1,5 +1,7 @@
 site_name: Fastscaffold
 repo_url: https://github.com/Tapeline/Fastscaffold
+copyright: © Copyright Tapeline 2025
+site_url: https://tapeline.github.io/Fastscaffold
 nav:
   - Home: index.md
   - Getting started:
