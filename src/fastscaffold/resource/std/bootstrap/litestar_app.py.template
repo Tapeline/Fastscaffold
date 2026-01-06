@@ -40,16 +40,8 @@ def _create_container(config: Config) -> AsyncContainer:
     )
 
 
-def _select_event_loop() -> None:
-    if sys.platform == "win32":
-        asyncio.set_event_loop_policy(
-            asyncio.WindowsSelectorEventLoopPolicy()
-        )
-
-
 def create_app() -> Litestar:
     """Bootstrap the app."""
-    _select_event_loop()
     config = _create_config()
     container = _create_container(config)
     {% if component.add_prometheus %}

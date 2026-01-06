@@ -5,6 +5,7 @@ from dishka.integrations.litestar import inject
 from litestar import Controller, Response, delete, get, post
 from litestar.datastructures import Cookie
 from pydantic import BaseModel
+from collections.abc import Sequence
 
 from {{slug}}.application.interactors.auth.login import LoginInteractor
 from {{slug}}.application.interactors.auth.logout import (
@@ -45,7 +46,7 @@ class ProfileResponse(BaseModel):
 
 class AuthController(Controller):
     path = "/auth"
-    tags = ("Auth",)
+    tags: Sequence[str] | None = ("Auth",)
 
     @post(
         path="/login",

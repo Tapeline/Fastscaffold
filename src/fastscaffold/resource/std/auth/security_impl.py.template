@@ -1,3 +1,4 @@
+import asyncio
 import secrets
 from typing import Final, override
 
@@ -16,14 +17,17 @@ _AUTH_TOKEN_BYTE_LEN: Final = 32
 class ArgonSecurity(PasswordHasher, PasswordHashComparator, AuthSessionGenerator):
     """Impl."""
 
-    @override
-    def hash(self, password: str) -> str:
-        return argon2.hash_password(password.encode()).decode()
+    def __init__(self) -> None:
+        self.ph = argon2.PasswordHasher()
 
     @override
-    def compare(self, hashed: str, password: str) -> bool:
+    async def hash(self, password: str) -> str:
+        return await asyncio.to_thread(self.ph.hash, password)
+
+    @override
+    async def compare(self, hashed: str, password: str) -> bool:
         try:
-            return argon2.verify_password(hashed.encode(), password.encode())
+            return await asyncio.to_thread(self.ph.verify, hashed, password)
         except VerifyMismatchError:
             return False
 

@@ -13,6 +13,7 @@ class SATransactionManager(TransactionManager):
         """Init the TransactionManager."""
         self.session = session
         self.execute = session.execute
+        self.merge = session.merge
         self.add = session.add
 
     @override
@@ -22,9 +23,9 @@ class SATransactionManager(TransactionManager):
     @override
     async def __aexit__(
         self,
-        exc_type: type[Exception],
+        exc_type: type[Exception] | None,
         exc_val: Exception | None,
-        exc_tb: Any
+        exc_tb: Any | None,
     ) -> None:
         if exc_val:
             await self.session.rollback()

@@ -5,6 +5,7 @@ from dishka import FromDishka
 from dishka.integrations.litestar import inject
 from litestar import Controller, delete, get, patch, post
 from msgspec import Struct
+from collections.abc import Sequence
 
 
 {% if "c" in component.opts %}
@@ -96,14 +97,16 @@ update_{{ component.entity | camel_to_snake }}_converter = get_converter(
 
 class {{ component.entity }}Controller(Controller):
     path = "/{{ component.entity | camel_to_snake | snake_to_kebab | plural }}"
-    tags = ("{{ component.entity | camel_to_human }}",)
+    tags: Sequence[str] | None = ("{{ component.entity | camel_to_human }}",)
 
     {% if "l" in component.opts %}
     @get(
         path="",
         responses={
             200: success_spec("Successful.", list[{{ component.entity }}Response]),
-            401: error_spec("Not authorized."),
+            {% if ctx["InteractorStore"].by_name("List" + plural(component.entity) + "Interactor").with_auth -%}
+            401: error_spec("Not authenticated."),
+            {%- endif %}
         },
         {% if ctx["InteractorStore"].by_name("List" + plural(component.entity) + "Interactor").with_auth -%}
         security=security_defs,
@@ -115,7 +118,14 @@ class {{ component.entity }}Controller(Controller):
         page: int = 0, page_size: int = 10,
         interactor: FromDishka[List{{ component.entity | plural }}Interactor],
     ) -> list[{{ component.entity }}Response]:
-        """List {{ component.entity | camel_to_human | plural }}."""
+        """
+        List {{ component.entity | camel_to_human | plural }}.
+
+        Args:
+            page: current page number starting from 0
+            page_size: size of page
+
+        """
         {{ component.entity | camel_to_snake | plural }} = await interactor(PaginationParams(page, page_size))
         return list(map({{ component.entity | camel_to_snake }}_converter, {{ component.entity | camel_to_snake | plural }}))
     {% endif %}
@@ -125,7 +135,9 @@ class {{ component.entity }}Controller(Controller):
         path="",
         responses={
             201: success_spec("Creation successful.", {{ component.entity }}Response),
-            401: error_spec("Not authorized."),
+            {% if ctx["InteractorStore"].by_name("Create" + component.entity + "Interactor").with_auth -%}
+            401: error_spec("Not authenticated."),
+            {%- endif %}
         },
         {% if ctx["InteractorStore"].by_name("Create" + component.entity + "Interactor").with_auth -%}
         security=security_defs,
@@ -148,7 +160,9 @@ class {{ component.entity }}Controller(Controller):
         responses={
             200: success_spec("Success.", {{ component.entity }}Response),
             404: error_spec("Not found."),
+            {% if ctx["InteractorStore"].by_name("Read" + component.entity + "Interactor").with_auth -%}
             401: error_spec("Not authenticated."),
+            {%- endif %}
         },
         {% if ctx["InteractorStore"].by_name("Read" + component.entity + "Interactor").with_auth -%}
         security=security_defs,
@@ -172,7 +186,9 @@ class {{ component.entity }}Controller(Controller):
             200: success_spec("Update successful.", {{ component.entity }}Response),
             403: error_spec("Forbidden."),
             404: error_spec("Not found."),
-            401: error_spec("Not authorized."),
+            {% if ctx["InteractorStore"].by_name("Update" + component.entity + "Interactor").with_auth -%}
+            401: error_spec("Not authenticated."),
+            {%- endif %}
         },
         {% if ctx["InteractorStore"].by_name("Update" + component.entity + "Interactor").with_auth -%}
         security=security_defs,
@@ -200,7 +216,9 @@ class {{ component.entity }}Controller(Controller):
             204: success_spec("Success.", None),
             403: error_spec("Forbidden."),
             404: error_spec("Not found."),
+            {% if ctx["InteractorStore"].by_name("Delete" + component.entity + "Interactor").with_auth -%}
             401: error_spec("Not authenticated."),
+            {%- endif %}
         },
         {% if ctx["InteractorStore"].by_name("Delete" + component.entity + "Interactor").with_auth -%}
         security=security_defs,

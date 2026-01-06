@@ -3,7 +3,12 @@ from typing import Protocol, Any
 
 
 class TransactionManager(Protocol):
-    """A unit of work."""
+    """
+    A business transaction.
+
+    Ain't UoW.
+
+    """
 
     @abstractmethod
     async def __aenter__(self) -> None:
@@ -12,8 +17,8 @@ class TransactionManager(Protocol):
     @abstractmethod
     async def __aexit__(
         self,
-        exc_type: type[Exception],
-        exc_val: Exception,
-        exc_tb: Any
+        exc_type: type[Exception] | None,
+        exc_val: Exception | None,
+        exc_tb: Any | None,
     ) -> None:
         """Rollback or commit."""

@@ -1,5 +1,8 @@
 from litestar.openapi import OpenAPIConfig
-from litestar.openapi.plugins import SwaggerRenderPlugin
+from litestar.openapi.plugins import (
+    SwaggerRenderPlugin, YamlRenderPlugin,
+    RapidocRenderPlugin, ScalarRenderPlugin
+)
 from litestar.openapi.spec import Components
 
 from {{slug}}.presentation.http.security import security_components
@@ -10,6 +13,9 @@ app_openapi_config = OpenAPIConfig(
     version="1.0.0",
     render_plugins=[
         SwaggerRenderPlugin(),
+        RapidocRenderPlugin(),
+        ScalarRenderPlugin(),
+        YamlRenderPlugin()
     ],
     path="/docs",
     components=Components(

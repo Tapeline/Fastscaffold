@@ -25,7 +25,7 @@ def new_session_maker(
 
     engine = create_async_engine(
         database_uri,
-        pool_size=15,
+        pool_size=25,
         max_overflow=15,
         connect_args={
             "connect_timeout": 5,

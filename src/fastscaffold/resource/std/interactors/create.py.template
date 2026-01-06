@@ -30,7 +30,7 @@ class {{ name }}Interactor:
         {%if with_auth%}user_id = await self.user_idp.get_user(){%endif%}
         async with self.transaction:
             {{entity.name|camel_to_snake}} = {{entity.name}}(
-                id=self.id_gen(),{% for field in entity.fields|no_id %}
+                id={{entity.name}}Id(self.id_gen()),{% for field in entity.fields|no_id %}
                 {{field}}=dto.{{field}},{% endfor %}
             )
             await self.{{entity.name|camel_to_snake}}_gw.save({{entity.name|camel_to_snake}})
