@@ -4,7 +4,7 @@ from fastscaffold.std.gen import (
 
 
 class DockerGen(SimpleManyTemplatesRender):
-    location = ["..", "..", "pyproject.toml"]
+    base_dir = ["..", ".."]
     templates = {
         "Dockerfile": "infra/Dockerfile.template",
         "docker-compose.yml": "infra/docker-compose.yml.template",
