@@ -19,6 +19,6 @@ class {{ name }}Interactor:
 
     async def __call__(self, uid: {{entity.name}}Id) -> None:
         """Call."""
-        {%if with_auth%}user_id = await self.user_idp.get_user(){%endif%}
+        {%if with_auth%}user_id = await self.user_idp.require_user(){%endif%}
         async with self.transaction:
             await self.{{entity.name|camel_to_snake}}_gw.delete_by_id(uid)

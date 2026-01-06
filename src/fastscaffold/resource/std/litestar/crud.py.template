@@ -6,6 +6,7 @@ from dishka.integrations.litestar import inject
 from litestar import Controller, delete, get, patch, post
 from msgspec import Struct
 from collections.abc import Sequence
+from {{ slug }}.data_commons import identity
 
 
 {% if "c" in component.opts %}
@@ -80,7 +81,7 @@ class {{ component.entity }}Response(Struct):
 {{ component.entity | camel_to_snake }}_converter = get_converter(
     {{ component.entity }}, {{ component.entity }}Response,
     recipe=[
-        coercer({{ component.entity }}Id, UUID, lambda x: x),
+        coercer({{ component.entity }}Id, UUID, identity),
     ],
 )
 {% if "c" in component.opts %}

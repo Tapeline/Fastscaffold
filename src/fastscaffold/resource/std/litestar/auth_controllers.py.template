@@ -26,8 +26,9 @@ class LoginSchema(BaseModel):
     password: str
 
 
-class RegisterSchema(LoginSchema):
-    ...
+class RegisterSchema(Struct):
+    username: str
+    password: str
 
 
 class SessionResponse(BaseModel):

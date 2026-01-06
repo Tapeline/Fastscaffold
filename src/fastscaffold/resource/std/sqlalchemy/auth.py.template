@@ -71,7 +71,7 @@ class AuthSessionGenerator(Protocol):
 
 @dataclass(slots=True, frozen=True)
 @final
-class UserCredentialStoreImpl(UserCredentialStore):
+class SqlUserCredentialStore(UserCredentialStore):
     """Impl."""
 
     transaction: SATransactionManager
@@ -98,8 +98,8 @@ class UserCredentialStoreImpl(UserCredentialStore):
         query = select(UserModel).where(
             UserModel.username == username
         )
-        result = await self.transaction.session.execute(query)
-        user = result.scalars().first()
+        models = await self.transaction.session.execute(query)
+        user = models.scalars().first()
         if not user:
             return None
         return (
@@ -115,8 +115,8 @@ class UserCredentialStoreImpl(UserCredentialStore):
             UserAuthSessionModel.token == token,
             UserAuthSessionModel.issued_at > expiry
         )
-        result = await self.transaction.session.execute(query)
-        token_model = result.scalars().first()
+        models = await self.transaction.session.execute(query)
+        token_model = models.scalars().first()
         if not token_model:
             return None
         return cast(UserId, token_model.user_id)

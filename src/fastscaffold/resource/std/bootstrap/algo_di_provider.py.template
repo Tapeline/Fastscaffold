@@ -1,7 +1,7 @@
 from dishka import Provider, Scope, provide, WithParents
 
 from {{slug}}.application.identifier import UUIDGenerator
-from {{slug}}.infrastructure.identifier import UUIDGeneratorImpl
+from {{slug}}.infrastructure.identifier import StdUUIDGenerator
 from {{slug}}.infrastructure.persistence.auth import (
     AuthSessionGenerator,
     PasswordHashComparator,
@@ -15,7 +15,7 @@ class AlgorithmsDIProvider(Provider):
 
     scope = Scope.APP  # type: ignore[mutable-override]
 
-    id_gen = provide(UUIDGeneratorImpl, provides=UUIDGenerator)
+    id_gen = provide(StdUUIDGenerator, provides=UUIDGenerator)
 
     @provide
     def provide_argon_security(self) -> WithParents[ArgonSecurity]:

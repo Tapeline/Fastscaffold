@@ -19,5 +19,5 @@ class GetProfileInteractor:
     async def __call__(self) -> User:
         async with self.transaction:
             return await self.user_gw.get_by_id(
-                await self.user_idp.get_user()
+                await self.user_idp.require_user()
             )

@@ -28,8 +28,6 @@ def _default_enricher(_: Any) -> dict[Any, Any]:
 
 def _create_handler(handler_def: HandlerDef) -> LitestarErrHandler:
     enricher: ErrorEnricher[Any] = _default_enricher
-    status: int = 0
-    code: str = ""
     if len(handler_def) == 2:
         status, code = handler_def
     else:

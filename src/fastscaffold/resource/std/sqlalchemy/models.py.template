@@ -23,7 +23,7 @@ class {{entity.name}}Model(Base):
         primary_key=True,
     )
     {% for field, type in entity.fields.items()|no_id %}
-    {% if type.endswith("Id") %}{{field}}: Mapped[str] = mapped_column(
+    {% if type.endswith("Id") %}{{field}}: Mapped[UUID] = mapped_column(
         "{{field}}",
         ForeignKey("{{type.removesuffix("Id")|camel_to_snake|plural}}.id")
     )
@@ -52,7 +52,7 @@ class UserAuthSessionModel(Base):
     user: Mapped[UserModel] = relationship()
     token: Mapped[str] = mapped_column(
         "token",
-        String(256),
+        String,
         primary_key=True
     )
     issued_at: Mapped[datetime] = mapped_column(

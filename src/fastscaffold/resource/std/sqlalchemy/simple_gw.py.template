@@ -17,9 +17,9 @@ class Sql{{entity.name}}Gateway({{entity.name}}Gateway):
     @override
     async def get_by_id(self, uid: {{entity.name}}Id) -> {{entity.name}}:
         query = select({{entity.name}}Model).where({{entity.name}}Model.id == uid)
-        result = await self.transaction.execute(query)
+        models = await self.transaction.execute(query)
         try:
-            return _convert_to_{{entity.name|camel_to_snake}}(result.scalars().one())
+            return _convert_to_{{entity.name|camel_to_snake}}(models.scalars().one())
         except NoResultFound as exc:
             raise {{entity.name}}NotFound(uid) from exc
     {% endif %}

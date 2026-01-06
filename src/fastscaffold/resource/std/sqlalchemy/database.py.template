@@ -1,6 +1,7 @@
 # Shamelessly copied from
 # https://github.com/Sehat1137/litestar-dishka-faststream
 
+from typing import Final
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -8,6 +9,10 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from {{slug}}.config import PostgresConfig
+
+_POOL_SIZE: Final = 25
+_MAX_POOL_OVERFLOW: Final = 15
+_CONNECTION_TIMEOUT_S: Final = 5
 
 
 def new_session_maker(
@@ -25,10 +30,10 @@ def new_session_maker(
 
     engine = create_async_engine(
         database_uri,
-        pool_size=25,
-        max_overflow=15,
+        pool_size=_POOL_SIZE,
+        max_overflow=_MAX_POOL_OVERFLOW,
         connect_args={
-            "connect_timeout": 5,
+            "connect_timeout": _CONNECTION_TIMEOUT_S,
         },
     )
     return async_sessionmaker(

@@ -4,7 +4,7 @@ import uuid
 from {{slug}}.application.identifier import UUIDGenerator
 
 
-class UUIDGeneratorImpl(UUIDGenerator):
+class StdUUIDGenerator(UUIDGenerator):
     """Impl."""
 
     @override

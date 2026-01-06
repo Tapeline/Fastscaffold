@@ -25,7 +25,7 @@ class {{ name }}Interactor:
 
     async def __call__(self, uid: {{entity.name}}Id, dto: Update{{entity.name}}DTO) -> {{entity.name}}:
         """Call."""
-        {%if with_auth%}user_id = await self.user_idp.get_user(){%endif%}
+        {%if with_auth%}user_id = await self.user_idp.require_user(){%endif%}
         async with self.transaction:
             {{entity.name|camel_to_snake}} = await self.{{entity.name|camel_to_snake}}_gw.get_by_id(uid)
             {% for field in entity.fields|no_id -%}

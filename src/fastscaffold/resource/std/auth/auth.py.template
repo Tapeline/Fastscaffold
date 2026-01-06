@@ -12,7 +12,7 @@ class UserIdProvider(Protocol):
     """Provides user identity."""
 
     @abstractmethod
-    async def get_user(self) -> {{user_class}}Id:
+    async def require_user(self) -> {{user_class}}Id:
         """
         Try to authorize user and return it.
 
@@ -108,7 +108,7 @@ class SessionCredStoreIdProvider(UserIdProvider):
     session: AuthSession
 
     @override
-    async def get_user(self) -> {{user_class}}Id:
+    async def require_user(self) -> {{user_class}}Id:
         user_id = await self.cred_store.authorize(self.session)
         if not user_id:
             raise UserNotAuthenticated
