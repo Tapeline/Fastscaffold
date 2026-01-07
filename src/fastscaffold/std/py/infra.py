@@ -9,4 +9,5 @@ class DockerGen(SimpleManyTemplatesRender):
         "Dockerfile": "infra/Dockerfile.template",
         "docker-compose.yml": "infra/docker-compose.yml.template",
         "start.sh": "infra/start.sh.template",
+        ".dockerignore": "infra/.dockerignore.template",
     }
