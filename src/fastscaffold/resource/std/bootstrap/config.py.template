@@ -19,3 +19,4 @@ class Config:
     """Main config."""
     {% for config in configs %}
     {{config.simple_name|camel_to_snake}}: {{config.name}}{% endfor %}
+    is_debug: bool = True

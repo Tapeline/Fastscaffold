@@ -1,8 +1,30 @@
 from dataclasses import dataclass
 from typing import final
 
+from structlog import getLogger
+
 from {{slug}}.application.auth.auth import UserCredentialStore, UserIdProvider
 from {{slug}}.application.persistence.transactions import TransactionManager
+
+logger = getLogger(__name__)
+
+
+@dataclass
+@final
+class LogoutInteractor:
+    """Revoke current session."""
+
+    transaction: TransactionManager
+    user_idp: UserIdProvider
+    cred_store: UserCredentialStore
+
+    async def __call__(self) -> None:
+        """Call."""
+        user_id = await self.user_idp.require_user()
+        logger.info("Revoking current session for user", user_id=user_id)
+        async with self.transaction:
+            await self.cred_store.revoke_sessions(user_id)
+
 
 @dataclass
 @final
@@ -16,5 +38,6 @@ class RevokeTokensInteractor:
     async def __call__(self) -> None:
         """Call."""
         user_id = await self.user_idp.require_user()
+        logger.info("Revoking all sessions for user", user_id=user_id)
         async with self.transaction:
             await self.cred_store.revoke_sessions(user_id)

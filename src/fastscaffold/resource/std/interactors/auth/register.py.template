@@ -1,10 +1,15 @@
 from dataclasses import dataclass
 from typing import final
 
+from structlog import getLogger
+
 from {{slug}}.application.auth.auth import UserCredentialStore
 from {{slug}}.application.identifier import UUIDGenerator
 from {{slug}}.application.persistence.transactions import TransactionManager
+
 {{user.import_line}}
+
+logger = getLogger(__name__)
 
 
 @dataclass
@@ -23,8 +28,9 @@ class RegisterInteractor:
     ) -> User:
         async with self.transaction:
             user = User(
-                id=self.id_gen(),
+                id=UserId(self.id_gen()),
                 username=username,
             )
             await self.user_cred_store.register_user(user, password)
+            logger.info("Registered user", username=username, id=user.id)
             return user

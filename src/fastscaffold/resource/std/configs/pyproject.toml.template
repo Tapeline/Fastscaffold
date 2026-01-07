@@ -2,24 +2,22 @@
 name = "{{slug}}"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "Tapeline", email = "mail@tapeline.dev"}
-]
 license = {text = "GNU GPL v3.0"}
 readme = "README.md"
 requires-python = ">=3.13,<4.0"
 dependencies = [
     "dishka (>=1.6.0,<2.0.0)",
     "sqlalchemy (>=2.0.41,<3.0.0)",
-    "pydantic (>=2.11.5,<3.0.0)",
-    "adaptix[sqlalchemy] (>=3.0.0b11,<4.0.0)",
+    "msgspec>=0.20.0",
+    "adaptix[msgspec,sqlalchemy] (>=3.0.0b11,<4.0.0)",
     "argon2-cffi (>=25.1.0,<26.0.0)",
-    "litestar[pydantic,standard] (>=2.16.0,<3.0.0)",
+    "litestar[prometheus,standard] (>=2.16.0,<3.0.0)",
     "inflection (>=0.5.1,<0.6.0)",
     "alembic (>=1.16.1,<2.0.0)",
     "psycopg (>=3.2.9,<4.0.0)",
     "psycopg-binary (>=3.2.9,<4.0.0)",
     "fuente",
+    "structlog>=25.5.0",
 ]
 
 [tool.uv.sources]
@@ -27,7 +25,6 @@ fuente = { git = "https://github.com/Tishka17/fuente.git" }
 
 [dependency-groups]
 lint = [
-    "pre-commit>=4.2.0",
     "mypy>=1.18.2",
     "ruff>=0.13.1",
     "wemake-python-styleguide>=1.4.0",

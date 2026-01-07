@@ -109,7 +109,7 @@ class SqlUserCredentialStore(UserCredentialStore):
         )
 
     @override
-    async def authorize(self, token: AuthSession) -> UserId | None:
+    async def authenticate(self, token: AuthSession) -> UserId | None:
         expiry = datetime.now() - self.sec_conf.session_lifetime
         query = select(UserAuthSessionModel).where(
             UserAuthSessionModel.token == token,
@@ -130,6 +130,14 @@ class SqlUserCredentialStore(UserCredentialStore):
         )
         await self.transaction.session.execute(query)
         return AuthSession(token)
+
+    @override
+    async def revoke_session(self, session: AuthSession) -> None:
+        await self.transaction.execute(
+            delete(UserAuthSessionModel).where(
+                UserAuthSessionModel.token == session
+            )
+        )
 
     @override
     async def revoke_sessions(self, user_id: UserId) -> None:

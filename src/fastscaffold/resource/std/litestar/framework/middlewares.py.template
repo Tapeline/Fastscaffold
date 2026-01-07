@@ -1,0 +1,36 @@
+import uuid
+from contextvars import ContextVar
+from typing import Final
+
+import structlog
+from litestar.enums import ScopeType
+from litestar.middleware import AbstractMiddleware
+from litestar.types import Receive, Scope, Send
+
+logger = structlog.getLogger(__name__)
+request_id = ContextVar("request_id")
+
+_ENRICHED_METHODS: Final = frozenset(
+    ("GET", "POST", "PATCH", "PUT", "DELETE")
+)
+
+
+class RequestIdMiddleware(AbstractMiddleware):
+    """Adds UUID for each request."""
+
+    async def __call__(
+        self, scope: Scope, receive: Receive, send: Send
+    ) -> None:
+        request_id.set(scope)
+        if scope["type"] != ScopeType.HTTP:
+            await self.app(scope, receive, send)
+            return
+        if scope["method"] not in _ENRICHED_METHODS:
+            await self.app(scope, receive, send)
+            return
+        uid = str(uuid.uuid4())
+        request_id.set(uid)
+        scope["request_id"] = uid
+        with structlog.contextvars.bound_contextvars(request_id=uid):
+            logger.debug("Set request id")
+            await self.app(scope, receive, send)

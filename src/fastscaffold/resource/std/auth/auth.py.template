@@ -2,8 +2,12 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Protocol, final, override, NewType
 
+from structlog import getLogger
+
 from {{slug}}.application.auth.exceptions import UserNotAuthenticated
 {{user_import}}
+
+logger = getLogger(__name__)
 
 AuthSession = NewType("AuthSession", str)
 
@@ -14,9 +18,9 @@ class UserIdProvider(Protocol):
     @abstractmethod
     async def require_user(self) -> {{user_class}}Id:
         """
-        Try to authorize user and return it.
+        Try to authenticate user and return it.
 
-        Returns: authorized user id
+        Returns: authenticated user id
 
         Raises:
             UserNotAuthenticated: if user is not authenticated
@@ -59,9 +63,9 @@ class UserCredentialStore(Protocol):
         raise NotImplementedError
 
     @abstractmethod
-    async def authorize(self, token: AuthSession) -> {{user_class}}Id | None:
+    async def authenticate(self, token: AuthSession) -> {{user_class}}Id | None:
         """
-        Authorize some user by token.
+        Authenticate some user by token.
 
         Args:
             user_id: target user
@@ -88,6 +92,17 @@ class UserCredentialStore(Protocol):
         raise NotImplementedError
 
     @abstractmethod
+    async def revoke_session(self, session: AuthSession) -> None:
+        """
+        Revoke only provided session of a user.
+
+        Args:
+            session: target user session
+
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     async def revoke_sessions(self, user_id: {{user_class}}Id) -> None:
         """
         Revoke all sessions from user.
@@ -109,7 +124,8 @@ class SessionCredStoreIdProvider(UserIdProvider):
 
     @override
     async def require_user(self) -> {{user_class}}Id:
-        user_id = await self.cred_store.authorize(self.session)
+        user_id = await self.cred_store.authenticate(self.session)
         if not user_id:
+            logger.info("Failed to authenticate user")
             raise UserNotAuthenticated
         return user_id

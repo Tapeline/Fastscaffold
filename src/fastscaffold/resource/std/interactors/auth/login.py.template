@@ -1,12 +1,16 @@
 from dataclasses import dataclass
 from typing import final
 
+from structlog import getLogger
+
 from {{slug}}.application.auth.auth import (
     AuthSession,
     UserCredentialStore,
 )
 from {{slug}}.application.auth.exceptions import UserCredsNotFound
 from {{slug}}.application.persistence.transactions import TransactionManager
+
+logger = getLogger(__name__)
 
 
 @dataclass
@@ -23,10 +27,13 @@ class LoginInteractor:
         password: str
     ) -> AuthSession:
         """Call."""
+        logger.info("Attempting login for user", username=username)
         async with self.transaction:
             user_id = await self.user_cred_store.login_user(
                 username, password
             )
             if not user_id:
+                logger.info("Login failed for user", username=username)
                 raise UserCredsNotFound
+            logger.info("Creating session for user", username=username)
             return await self.user_cred_store.generate_session(user_id)

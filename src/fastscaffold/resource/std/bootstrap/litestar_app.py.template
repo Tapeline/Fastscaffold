@@ -1,6 +1,3 @@
-import asyncio
-import sys
-
 from dishka import AsyncContainer, make_async_container
 from dishka.integrations.litestar import (
     LitestarProvider,
@@ -12,6 +9,8 @@ from litestar.logging import LoggingConfig
 {% if component.add_prometheus %}
 from litestar.plugins.prometheus import PrometheusConfig, PrometheusController
 {% endif %}
+from litestar.middleware import DefineMiddleware
+from structlog import getLogger
 
 {% for di_provider in di_providers %}{{di_provider.import_line}}
 {% endfor %}
@@ -23,6 +22,9 @@ from {{slug}}.presentation.http.openapi import app_openapi_config
 {% for controller in ctx["LitestarControllerStore"].controllers -%}
 from {{ slug }}.{{ controller.module_name }} import {{ controller.name }}
 {% endfor %}
+from {{ slug }}.presentation.http.framework.middlewares import RequestIdMiddleware
+
+logger = getLogger(__name__)
 
 
 def _create_config() -> Config:
@@ -43,6 +45,7 @@ def _create_container(config: Config) -> AsyncContainer:
 def create_app() -> Litestar:
     """Bootstrap the app."""
     config = _create_config()
+    logger.info("Bootstrapping the application")
     container = _create_container(config)
     {% if component.add_prometheus %}
     prometheus_config = PrometheusConfig(
@@ -52,7 +55,7 @@ def create_app() -> Litestar:
     )
     {% endif %}
     litestar_app = Litestar(
-        debug=True,
+        debug=config.is_debug,
         route_handlers=[
             # TODO fill this
             {% for controller in ctx["LitestarControllerStore"].controllers -%}
@@ -61,6 +64,7 @@ def create_app() -> Litestar:
             {% if component.add_prometheus %}PrometheusController,{% endif %}
         ],
         middleware=[
+            DefineMiddleware(RequestIdMiddleware),
             {% if component.add_prometheus %}prometheus_config.middleware,{% endif %}
         ],
         exception_handlers=handlers,  # type: ignore[arg-type]
@@ -71,4 +75,5 @@ def create_app() -> Litestar:
         ],
     )
     litestar_setup_dishka(container, litestar_app)
+    logger.info("All good to go")
     return litestar_app

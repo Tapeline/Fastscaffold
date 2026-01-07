@@ -9,7 +9,7 @@ from collections.abc import Sequence
 
 from {{slug}}.application.interactors.auth.login import LoginInteractor
 from {{slug}}.application.interactors.auth.logout import (
-    RevokeTokensInteractor,
+    RevokeTokensInteractor, LogoutInteractor,
 )
 from {{slug}}.application.interactors.auth.profile import GetProfileInteractor
 from {{slug}}.application.interactors.auth.register import RegisterInteractor
@@ -138,6 +138,24 @@ class AuthController(Controller):
         )
 
     @delete(
+        path="/logout",
+        description=(
+            "Revoke current session for me."
+        ),
+        responses={
+            204: success_spec("Success.", None),
+            401: error_spec("Not authenticated."),
+        },
+        security=security_defs
+    )
+    @inject
+    async def logout(
+        self, *,
+        interactor: FromDishka[LogoutInteractor]
+    ) -> None:
+        await interactor()
+
+    @delete(
         path="/revoke-tokens",
         description=(
             "Revoke all access tokens for me."
@@ -146,7 +164,7 @@ class AuthController(Controller):
             204: success_spec("Success.", None),
             401: error_spec("Not authenticated."),
         },
-        security=[{"jwt_auth": []}]
+        security=security_defs
     )
     @inject
     async def revoke_tokens(
