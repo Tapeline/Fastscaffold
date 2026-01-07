@@ -17,6 +17,7 @@ from {{slug}}.config import SecurityConfig
 from {{slug}}.presentation.http.framework.openapi import (
     error_spec,
     success_spec,
+    RESPONSE_NOT_AUTHENTICATED,
 )
 from {{slug}}.presentation.http.security import security_defs
 
@@ -122,7 +123,7 @@ class AuthController(Controller):
         ),
         responses={
             200: success_spec("Success.", ProfileResponse),
-            401: error_spec("Not authenticated."),
+            **RESPONSE_NOT_AUTHENTICATED,
         },
         security=security_defs
     )
@@ -143,8 +144,8 @@ class AuthController(Controller):
             "Revoke current session for me."
         ),
         responses={
-            204: success_spec("Success.", None),
-            401: error_spec("Not authenticated."),
+            204: success_spec("Successfully logged out.", None),
+            **RESPONSE_NOT_AUTHENTICATED,
         },
         security=security_defs
     )
@@ -161,8 +162,8 @@ class AuthController(Controller):
             "Revoke all access tokens for me."
         ),
         responses={
-            204: success_spec("Success.", None),
-            401: error_spec("Not authenticated."),
+            204: success_spec("Successfully logged out.", None),
+            **RESPONSE_NOT_AUTHENTICATED,
         },
         security=security_defs
     )

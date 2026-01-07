@@ -8,7 +8,7 @@ def dto[DTO_T](cls: type[DTO_T]) -> type[DTO_T]:
     return dataclass(slots=True, frozen=True)(cls)
 
 
-@dataclass_transform
+@dataclass_transform()
 def entity[Entity_T](cls: type[Entity_T]) -> type[Entity_T]:
     """Alias to slotted dataclass."""
     return dataclass(slots=True)(cls)

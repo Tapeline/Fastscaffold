@@ -1,10 +1,11 @@
-from typing import Any
+from types import MappingProxyType
+from typing import Any, Final
 
 from litestar.openapi import ResponseSpec
-from pydantic import BaseModel
+from msgspec import Struct
 
 
-class CommonErrorSchema(BaseModel):
+class CommonErrorSchema(Struct):
     """Used for all errors."""
 
     code: str
@@ -12,14 +13,14 @@ class CommonErrorSchema(BaseModel):
     extra: dict[str, Any] | None = None
 
 
-def success_spec[_Response_T](
+def success_spec[Response_T](
     description: str,
-    container: type[_Response_T] | None = None
+    container: type[Response_T] | None = None,
 ) -> ResponseSpec:
     """Return response spec with success and data."""
     return ResponseSpec(
         description=description,
-        data_container=container
+        data_container=container,
     )
 
 
@@ -28,5 +29,16 @@ def error_spec(description: str) -> ResponseSpec:
     return ResponseSpec(
         description=description,
         data_container=CommonErrorSchema,
-        generate_examples=False
+        generate_examples=False,
     )
+
+
+RESPONSE_NOT_AUTHENTICATED: Final = MappingProxyType(
+    {401: error_spec("Not authenticated.")}
+)
+RESPONSE_FORBIDDEN: Final = MappingProxyType(
+    {403: error_spec("Forbidden.")}
+)
+RESPONSE_NOT_FOUND: Final = MappingProxyType(
+    {404: error_spec("Not found.")}
+)

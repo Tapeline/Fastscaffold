@@ -41,6 +41,8 @@ from {{ slug }}.domain.{{ component.entity | camel_to_snake }} import {{ compone
 from {{ slug }}.presentation.http.framework.openapi import (
     error_spec,
     success_spec,
+    RESPONSE_NOT_AUTHENTICATED,
+    RESPONSE_NOT_FOUND,
 )
 from {{ slug }}.presentation.http.security import security_defs
 
@@ -106,7 +108,7 @@ class {{ component.entity }}Controller(Controller):
         responses={
             200: success_spec("Successful.", list[{{ component.entity }}Response]),
             {% if ctx["InteractorStore"].by_name("List" + plural(component.entity) + "Interactor").with_auth -%}
-            401: error_spec("Not authenticated."),
+            **RESPONSE_NOT_AUTHENTICATED,
             {%- endif %}
         },
         {% if ctx["InteractorStore"].by_name("List" + plural(component.entity) + "Interactor").with_auth -%}
@@ -137,7 +139,7 @@ class {{ component.entity }}Controller(Controller):
         responses={
             201: success_spec("Creation successful.", {{ component.entity }}Response),
             {% if ctx["InteractorStore"].by_name("Create" + component.entity + "Interactor").with_auth -%}
-            401: error_spec("Not authenticated."),
+            **RESPONSE_NOT_AUTHENTICATED,
             {%- endif %}
         },
         {% if ctx["InteractorStore"].by_name("Create" + component.entity + "Interactor").with_auth -%}
@@ -160,9 +162,9 @@ class {{ component.entity }}Controller(Controller):
         path="/{uid:uuid}",
         responses={
             200: success_spec("Success.", {{ component.entity }}Response),
-            404: error_spec("Not found."),
+            **RESPONSE_NOT_FOUND,
             {% if ctx["InteractorStore"].by_name("Read" + component.entity + "Interactor").with_auth -%}
-            401: error_spec("Not authenticated."),
+            **RESPONSE_NOT_AUTHENTICATED,
             {%- endif %}
         },
         {% if ctx["InteractorStore"].by_name("Read" + component.entity + "Interactor").with_auth -%}
@@ -185,10 +187,10 @@ class {{ component.entity }}Controller(Controller):
         path="/{uid:uuid}",
         responses={
             200: success_spec("Update successful.", {{ component.entity }}Response),
-            403: error_spec("Forbidden."),
-            404: error_spec("Not found."),
+            **RESPONSE_NOT_FOUND,
+            **RESPONSE_FORBIDDEN,
             {% if ctx["InteractorStore"].by_name("Update" + component.entity + "Interactor").with_auth -%}
-            401: error_spec("Not authenticated."),
+            **RESPONSE_NOT_AUTHENTICATED,
             {%- endif %}
         },
         {% if ctx["InteractorStore"].by_name("Update" + component.entity + "Interactor").with_auth -%}
@@ -215,10 +217,10 @@ class {{ component.entity }}Controller(Controller):
         path="/{uid:uuid}",
         responses={
             204: success_spec("Success.", None),
-            403: error_spec("Forbidden."),
-            404: error_spec("Not found."),
+            **RESPONSE_NOT_FOUND,
+            **RESPONSE_FORBIDDEN,
             {% if ctx["InteractorStore"].by_name("Delete" + component.entity + "Interactor").with_auth -%}
-            401: error_spec("Not authenticated."),
+            **RESPONSE_NOT_AUTHENTICATED,
             {%- endif %}
         },
         {% if ctx["InteractorStore"].by_name("Delete" + component.entity + "Interactor").with_auth -%}

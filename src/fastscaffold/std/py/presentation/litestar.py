@@ -40,6 +40,7 @@ class LitestarCommonsGen(SimpleManyTemplatesRender):
         "security.py": "litestar/security.py.template",
         "framework/errors.py": "litestar/framework/errors.py.template",
         "framework/openapi.py": "litestar/framework/openapi.py.template",
+        "framework/middlewares.py": "litestar/framework/middlewares.py.template",
     }
 
 

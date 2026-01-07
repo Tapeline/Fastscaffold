@@ -75,7 +75,9 @@ ignore = [
 external = ["WPS"]
 exclude = [
     "docs/**",
-    "examples/**"
+    "examples/**",
+    "src/{{slug}}/infrastructure/persistence/migrations/**",
+    "tests/**"
 ]
 
 [lint.per-file-ignores]

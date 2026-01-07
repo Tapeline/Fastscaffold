@@ -26,7 +26,7 @@ class PasswordHasher(Protocol):
     """Hash algorithm."""
 
     @abstractmethod
-    def hash(self, password: str) -> str:
+    async def hash(self, password: str) -> str:
         """
         Hash the password.
 
@@ -42,7 +42,7 @@ class PasswordHashComparator(Protocol):
     """Hashed pass comparator."""
 
     @abstractmethod
-    def compare(self, hashed: str, password: str) -> bool:
+    async def compare(self, hashed: str, password: str) -> bool:
         """
         Compare hashed and raw password.
 
@@ -86,7 +86,7 @@ class SqlUserCredentialStore(UserCredentialStore):
             id=user.id,
             {% for field in ctx["EntityStore"].entities["User"].fields %}{{field}}=user.{{field}},
             {% endfor %}
-            hashed_password=self.password_hasher.hash(password),
+            hashed_password=await self.password_hasher.hash(password),
         )
         try:
             await self.transaction.session.execute(query)
@@ -104,13 +104,17 @@ class SqlUserCredentialStore(UserCredentialStore):
             return None
         return (
             cast(UserId, user.id)
-            if self.password_comparator.compare(user.hashed_password, password)
+            if await self.password_comparator.compare(
+                user.hashed_password, password
+            )
             else None
         )
 
     @override
     async def authenticate(self, token: AuthSession) -> UserId | None:
-        expiry = datetime.now() - self.sec_conf.session_lifetime
+        expiry = (
+            datetime.now() - self.sec_conf.session_lifetime  # noqa: DTZ005
+        )
         query = select(UserAuthSessionModel).where(
             UserAuthSessionModel.token == token,
             UserAuthSessionModel.issued_at > expiry

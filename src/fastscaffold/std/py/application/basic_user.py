@@ -116,27 +116,27 @@ class BasicAppAuthInteractorsGen(SimpleManyTemplatesRender):
             ctx[InteractorStore] = InteractorStore([])
         ctx[InteractorStore].interactors.extend([
             GeneratedInteractor(
-                "LoginInteractor",
+                "Login",
                 f"application.interactors.auth.login",
                 with_auth=False,
             ),
             GeneratedInteractor(
-                "LogoutInteractor",
+                "Logout",
                 f"application.interactors.auth.logout",
                 with_auth=True,
             ),
             GeneratedInteractor(
-                "RevokeTokensInteractor",
+                "RevokeTokens",
                 f"application.interactors.auth.logout",
                 with_auth=True,
             ),
             GeneratedInteractor(
-                "GetProfileInteractor",
+                "GetProfile",
                 f"application.interactors.auth.profile",
                 with_auth=True,
             ),
             GeneratedInteractor(
-                "RegisterInteractor",
+                "Register",
                 f"application.interactors.auth.register",
                 with_auth=False,
             ),
