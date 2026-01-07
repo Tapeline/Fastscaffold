@@ -4,10 +4,6 @@ from typing import Any
 from fastscaffold.core.context import ScaffoldRunContext
 from fastscaffold.std.configs import WebProjectConfig
 from fastscaffold.std.gen import SimpleManyTemplatesRender
-from fastscaffold.std.py.application.interactors import (
-    GeneratedInteractor,
-    InteractorStore,
-)
 from fastscaffold.std.py.application.persistence import GatewayStore
 from fastscaffold.std.py.domain import EntityStore
 
@@ -112,6 +108,10 @@ class BasicAppAuthInteractorsGen(SimpleManyTemplatesRender):
         )
 
     def after_build(self, ctx: ScaffoldRunContext) -> None:
+        from fastscaffold.std.py.application.interactors import (
+            GeneratedInteractor,
+            InteractorStore,
+        )
         if InteractorStore not in ctx:
             ctx[InteractorStore] = InteractorStore([])
         ctx[InteractorStore].interactors.extend([
